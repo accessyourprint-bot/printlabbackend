@@ -1,0 +1,150 @@
+﻿# ============================================================
+# ALT PRINT - Docker Compose (Production Stack)
+# Services: FastAPI, PostgreSQL, Redis, Celery Worker, Celery Beat, Flower
+# ============================================================
+
+services:
+
+  # â”€â”€ PostgreSQL Database â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  postgres:
+    image: postgres:16-alpine
+    container_name: altprint_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: altprint
+      POSTGRES_PASSWORD: altprint_secure_password
+      POSTGRES_DB: altprint_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U altprint -d altprint_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # â”€â”€ Redis Cache & Message Broker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  redis:
+    image: redis:7-alpine
+    container_name: altprint_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # â”€â”€ FastAPI Backend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: altprint_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://altprint:altprint_secure_password@postgres:5432/altprint_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./logs:/app/logs
+      - altprint_files:/app/.local_storage
+
+  # â”€â”€ Celery Worker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: altprint_celery_worker
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_tasks.celery_app worker --loglevel=info --concurrency=4
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://altprint:altprint_secure_password@postgres:5432/altprint_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - altprint_files:/app/.local_storage
+
+  # â”€â”€ Celery Beat Scheduler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: altprint_celery_beat
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_tasks.celery_app beat --loglevel=info --scheduler celery.beat:PersistentScheduler
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://altprint:altprint_secure_password@postgres:5432/altprint_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      - celery_worker
+
+  # â”€â”€ Celery Flower (monitoring) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: altprint_flower
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_tasks.celery_app flower --port=5555 --basic-auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-flowerpass}
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery_worker
+
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  altprint_files:
+    driver: local
+
+networks:
+  default:
+    name: altprint_network
+
+
+

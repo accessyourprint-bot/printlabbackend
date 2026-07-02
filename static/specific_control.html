@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrintLab Outlet</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;}
+
+/* LOGIN */
+#lw{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f0eb;}
+.lb{background:#fff;border-radius:14px;padding:40px;width:340px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.lb h2{font-size:1.3rem;font-weight:800;margin-bottom:4px;}
+.lb p{color:#666;font-size:.84rem;margin-bottom:24px;}
+.fi-label{display:block;font-size:.8rem;font-weight:600;color:#444;margin-bottom:5px;}
+.fi{width:100%;padding:11px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.93rem;margin-bottom:14px;font-family:inherit;}
+.fi:focus{outline:none;border-color:#e84c1e;}
+.lpb{width:100%;padding:12px;background:#e84c1e;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;}
+.lpb:hover{background:#c73d17;}
+.lerr{color:#e84c1e;font-size:.8rem;margin-top:8px;text-align:center;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1px solid #eee;padding:0 32px;height:72px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:80;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tbl{display:flex;align-items:center;gap:16px;}
+.shop-icon-wrap{position:relative;}
+.shop-icon-btn{width:48px;height:48px;background:#fff3ee;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;border:none;flex-shrink:0;}
+.shop-title{font-size:1.05rem;font-weight:800;color:#1a1a1a;}
+.shop-sub{font-size:.76rem;color:#888;margin-top:1px;}
+.tbr{display:flex;align-items:center;gap:10px;}
+.tbtn{display:flex;align-items:center;gap:7px;padding:10px 20px;border:1.5px solid #e0e0e0;background:#fff;border-radius:24px;cursor:pointer;font-size:.85rem;font-weight:600;color:#1a1a1a;white-space:nowrap;}
+.tbtn:hover{border-color:#bbb;background:#fafafa;}
+.tbtn-red{background:#e84c1e;color:#fff;border-color:#e84c1e;}
+.tbtn-red:hover{background:#c73d17;border-color:#c73d17;}
+.tbtn-wrap{position:relative;}
+
+/* DROPDOWNS */
+.sdrop{position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.13);min-width:180px;z-index:200;border:1px solid #eee;overflow:hidden;}
+.tdrop{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.13);min-width:210px;z-index:200;border:1px solid #eee;overflow:hidden;}
+.sdrop.hidden,.tdrop.hidden{display:none;}
+.sdi,.tdi{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;font-size:.88rem;font-weight:500;}
+.sdi:hover,.tdi:hover{background:#f7f7f7;}
+.sdi.red{color:#e84c1e;}
+
+/* CONTENT */
+.content{padding:28px 32px;max-width:1200px;margin:0 auto;}
+.jcard{background:#fff;border-radius:16px;border:1.5px solid #eee;overflow:hidden;}
+.jhd{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;border-bottom:1px solid #f0f0f0;}
+.jhd h2{font-size:1.1rem;font-weight:800;}
+.ttabs{display:flex;gap:6px;}
+.ttab{padding:7px 16px;border:1.5px solid #e0e0e0;background:#fff;border-radius:20px;cursor:pointer;font-size:.82rem;font-weight:600;color:#555;}
+.ttab:hover{border-color:#e84c1e;color:#e84c1e;}
+.ttab.on{background:#1a1a1a;border-color:#1a1a1a;color:#fff;}
+
+/* JOB ITEMS */
+.ji{border-bottom:1px solid #f5f5f5;padding:20px 28px;cursor:pointer;}
+.ji:last-child{border-bottom:none;}
+.ji:hover{background:#fafafa;}
+.ji-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.ji-id{color:#e84c1e;font-weight:700;font-size:.92rem;}
+.ji-st{padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:700;}
+.st-pending{background:#fff3e0;color:#e65100;}
+.st-confirmed{background:#e3f2fd;color:#1565c0;}
+.st-completed{background:#e8f5e9;color:#2e7d32;}
+.st-cancelled{background:#ffebee;color:#c62828;}
+.ji-name{font-weight:700;font-size:.95rem;margin-bottom:2px;}
+.ji-phone{font-size:.82rem;color:#888;margin-bottom:10px;}
+.ji-bot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.ji-file{display:flex;align-items:center;gap:5px;color:#e84c1e;font-size:.84rem;font-weight:600;}
+.ji-copies{font-size:.82rem;color:#666;}
+.ji-type{padding:3px 11px;border:1.5px solid #e0e0e0;border-radius:20px;font-size:.76rem;font-weight:600;color:#333;}
+.ji-date{font-size:.8rem;color:#aaa;margin-left:auto;}
+.empty{text-align:center;padding:56px;color:#bbb;font-size:.92rem;}
+.loading{text-align:center;padding:40px;color:#e84c1e;}
+
+/* MODALS */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300;padding:16px;}
+.mo.hidden{display:none;}
+.mb{background:#fff;border-radius:18px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.mb-wide{max-width:660px;}
+.mh{padding:22px 28px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0;}
+.mh h3{font-size:1.08rem;font-weight:800;}
+.mh p{font-size:.79rem;color:#888;margin-top:3px;}
+.mx{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999;padding:0;line-height:1;}
+.mx:hover{color:#333;}
+.mbody{padding:22px 28px;overflow-y:auto;flex:1;}
+.mfoot{padding:16px 28px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+.bcn{padding:10px 24px;border:1.5px solid #e0e0e0;background:#fff;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:600;}
+.bsb{padding:10px 24px;background:#e84c1e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:700;}
+.bsb:hover{background:#c73d17;}
+.borange{background:#e84c1e;color:#fff;border:none;border-radius:8px;padding:10px 22px;cursor:pointer;font-size:.88rem;font-weight:700;}
+.borange:hover{background:#c73d17;}
+
+/* DELIVERY TEAM */
+.ag{border:1.5px solid #eee;border-radius:12px;padding:18px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px;}
+.ag:last-child{margin-bottom:0;}
+.av{width:48px;height:48px;background:#f0f0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.an{font-weight:800;font-size:.95rem;}
+.aa{font-size:.78rem;color:#888;margin-top:1px;}
+.ai{font-size:.84rem;color:#444;margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+
+/* PERFORMANCE */
+.pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.psc{border:1.5px solid #eee;border-radius:12px;padding:16px;}
+.psl{font-size:.74rem;color:#888;font-weight:600;margin-bottom:5px;}
+.psv{font-size:1.6rem;font-weight:800;}
+.psv.or{color:#e65100;}
+.psv.bl{color:#1565c0;}
+.psv.gr{color:#2e7d32;}
+.et{font-weight:700;font-size:.9rem;margin-bottom:14px;}
+.eb{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ebd{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.ebl{width:60px;font-size:.86rem;font-weight:600;flex-shrink:0;}
+.ebtr{flex:1;height:8px;background:#f0f0f0;border-radius:5px;overflow:hidden;}
+.ebf{height:100%;border-radius:5px;transition:width .3s ease;}
+.ebv{font-size:.86rem;font-weight:700;min-width:65px;text-align:right;}
+.sh-btn-row{display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;}
+
+/* SALES HISTORY */
+.shtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.shtab{padding:6px 15px;border:1.5px solid #e0e0e0;background:#fff;border-radius:20px;cursor:pointer;font-size:.8rem;font-weight:600;color:#555;}
+.sh3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.sh3c{background:#f8f8f8;border-radius:10px;padding:14px 16px;}
+.sh3l{font-size:.74rem;color:#888;font-weight:600;margin-bottom:4px;}
+.sh3v{font-size:1.45rem;font-weight:800;}
+.scht{font-weight:700;font-size:.9rem;margin-bottom:3px;}
+.schs{font-size:.76rem;color:#888;margin-bottom:12px;}
+.dhr{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid #f5f5f5;}
+.dhr:last-child{border-bottom:none;}
+.dhd{font-weight:700;font-size:.87rem;}
+.dhdt{font-size:.74rem;color:#aaa;margin-top:1px;margin-bottom:4px;}
+.dhdots{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;}
+.dhdot{display:inline-flex;align-items:center;gap:3px;font-size:.72rem;color:#666;}
+.dhdc{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.dhv{font-weight:800;font-size:.9rem;flex-shrink:0;}
+
+/* FORMS */
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:.8rem;font-weight:600;color:#333;margin-bottom:5px;}
+.fg input,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.9rem;font-family:inherit;}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:#e84c1e;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.hidden{display:none!important;}
+canvas{width:100%!important;}
+@media(max-width:760px){
+  .topbar{padding:0 16px;}
+  .content{padding:16px;}
+  .tbtn span{display:none;}
+  .pstats{grid-template-columns:1fr 1fr;}
+  .sh3{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="lw">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f0eb;">
+    <div class="lb">
+      <h2>PrintLab Outlet</h2>
+      <p>Sign in to manage your shop</p>
+      <label class="fi-label">Email</label>
+      <input class="fi" type="email" id="em" value="shop@altprint.in">
+      <label class="fi-label">Password</label>
+      <input class="fi" type="password" id="pw" value="Shop1234!">
+      <button class="lpb" onclick="doLogin()">Sign In</button>
+      <div class="lerr" id="lerr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dw" class="hidden">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tbl">
+      <div class="shop-icon-wrap">
+        <button class="shop-icon-btn" onclick="toggleSD()" id="siBtn">&#127968;</button>
+        <div id="sdrop" class="sdrop hidden">
+          <div class="sdi" onclick="closeSD();openDT()">&#128666; Logistics</div>
+          <div class="sdi" onclick="closeSD();alert(curShop?curShop.name:String(curShop.id))">&#9881;&#65039; Settings</div>
+          <div class="sdi red" onclick="doLogout()">&#8594; Logout</div>
+        </div>
+      </div>
+      <div>
+        <div class="shop-title" id="shopName">Print Lab Koramangala</div>
+        <div class="shop-sub">Dashboard</div>
+      </div>
+    </div>
+    <div class="tbr">
+      <button class="tbtn" onclick="openDT()">&#128101; <span>Delivery Team</span></button>
+      <button class="tbtn" onclick="openPS()">&#128202; <span>Performance Status</span></button>
+      <div class="tbtn-wrap">
+        <button class="tbtn tbtn-red" onclick="toggleTD()" id="tBtn">&#127915; <span>Ticket Raise</span> &#9660;</button>
+        <div id="tdrop" class="tdrop hidden">
+          <div class="tdi" onclick="openTK('customer')">&#128100; Customer Ticket Raise</div>
+          <div class="tdi" onclick="openTK('stock')">&#128230; Stock Ticket Raise</div>
+          <div class="tdi" onclick="openTK('technical')">&#128295; Technical Issue</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE JOBS -->
+  <div class="content">
+    <div class="jcard">
+      <div class="jhd">
+        <h2>Active Jobs</h2>
+        <div class="ttabs">
+          <button class="ttab on" onclick="fj('all',this)">B/W</button>
+          <button class="ttab" onclick="fj('colour',this)">Colour</button>
+          <button class="ttab" onclick="fj('photo',this)">Photo</button>
+          <button class="ttab" onclick="fj('tshirt',this)">T-Shirt</button>
+          <button class="ttab" onclick="fj('project',this)">Project</button>
+        </div>
+      </div>
+      <div id="jl"><div class="loading">Loading&#8230;</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DELIVERY TEAM MODAL -->
+<div id="dtMo" class="mo hidden">
+  <div class="mb">
+    <div class="mh">
+      <div><h3>Delivery Team</h3><p id="dtSub">People assigned to this outlet.</p></div>
+      <button class="mx" onclick="cMo('dtMo')">&#10005;</button>
+    </div>
+    <div class="mbody" id="dtB"><div class="loading">Loading&#8230;</div></div>
+    <div class="mfoot"><button class="bsb" onclick="openAA()">+ Add Person</button></div>
+  </div>
+</div>
+
+<!-- ADD AGENT MODAL -->
+<div id="aaMo" class="mo hidden">
+  <div class="mb">
+    <div class="mh"><div><h3>Add Delivery Person</h3></div><button class="mx" onclick="cMo('aaMo')">&#10005;</button></div>
+    <div class="mbody">
+      <div class="fg"><label>Name</label><input id="aNm" placeholder="Full name"></div>
+      <div class="fg2">
+        <div class="fg"><label>Age</label><input id="aAge" type="number" placeholder="26"></div>
+        <div class="fg"><label>Phone</label><input id="aPh" placeholder="9876543210"></div>
+      </div>
+      <div class="fg"><label>Vehicle Number</label><input id="aVeh" placeholder="KA01AB1234"></div>
+    </div>
+    <div class="mfoot">
+      <button class="bcn" onclick="cMo('aaMo')">Cancel</button>
+      <button class="bsb" onclick="subAA()">Add Person</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERFORMANCE STATUS MODAL -->
+<div id="psMo" class="mo hidden">
+  <div class="mb mb-wide">
+    <div class="mh">
+      <div><h3>Performance Status</h3><p>Snapshot of orders over the last 8 days.</p></div>
+      <button class="mx" onclick="cMo('psMo')">&#10005;</button>
+    </div>
+    <div class="mbody">
+      <div class="pstats" id="psS"></div>
+      <div class="et">Earnings by Print Type (Today)</div>
+      <div id="psB"></div>
+      <div class="sh-btn-row">
+        <button class="borange" onclick="openSH()">&#128200; Sales History</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SALES HISTORY MODAL -->
+<div id="shMo" class="mo hidden">
+  <div class="mb mb-wide">
+    <div class="mh">
+      <div><h3>Sales History</h3><p>Last 8 days, by print type</p></div>
+      <button class="mx" onclick="cMo('shMo')">&#10005;</button>
+    </div>
+    <div class="mbody">
+      <div class="shtabs" id="shTabs">
+        <button class="shtab" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a" onclick="shF('all',this)">All Types</button>
+        <button class="shtab" onclick="shF('Bw',this)">B/W</button>
+        <button class="shtab" onclick="shF('Colour',this)">Colour</button>
+        <button class="shtab" onclick="shF('Photo',this)">Photo</button>
+        <button class="shtab" onclick="shF('Tshirt',this)">T-Shirt</button>
+        <button class="shtab" onclick="shF('Project',this)">Project</button>
+      </div>
+      <div class="sh3">
+        <div class="sh3c"><div class="sh3l">Today's Earnings</div><div class="sh3v" id="shT">&#8377;0</div></div>
+        <div class="sh3c"><div class="sh3l">8-Day Total</div><div class="sh3v" id="sh8">&#8377;0</div></div>
+        <div class="sh3c"><div class="sh3l">Daily Average</div><div class="sh3v" id="shA">&#8377;0</div></div>
+      </div>
+      <div class="scht" id="shCT">Sales Over Time &#8212; All Types</div>
+      <div class="schs">Daily sales (&#8377;). Day 1 = oldest, Day 8 = today.</div>
+      <canvas id="shC" height="180"></canvas>
+      <div style="font-weight:700;font-size:.9rem;margin:18px 0 10px">Daily History</div>
+      <div id="shH"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKET MODAL -->
+<div id="tkMo" class="mo hidden">
+  <div class="mb">
+    <div class="mh">
+      <div><h3 id="tkT">Customer Ticket Raise</h3><p id="tkS"></p></div>
+      <button class="mx" onclick="cMo('tkMo')">&#10005;</button>
+    </div>
+    <div class="mbody">
+      <div class="fg"><label>Raised By</label><input id="tBy" placeholder="Your name"></div>
+      <div class="fg"><label>Subject</label><input id="tSj" placeholder="Brief description"></div>
+      <div class="fg"><label>Details (Optional)</label><textarea id="tDt" rows="3" placeholder="More details..."></textarea></div>
+    </div>
+    <div class="mfoot">
+      <button class="bcn" onclick="cMo('tkMo')">Cancel</button>
+      <button class="bsb" onclick="subTK()">Raise Ticket</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const API = window.location.origin;
+const TC = {Bw:'#3b82f6',Colour:'#f97316',Photo:'#10b981',Tshirt:'#8b5cf6',Project:'#ef4444'};
+const TN = ['Bw','Colour','Photo','Tshirt','Project'];
+const TL = {Bw:'B/W',Colour:'Colour',Photo:'Photo',Tshirt:'T-Shirt',Project:'Project'};
+
+let tok = localStorage.getItem('pl_s');
+let curShop = null;
+let allOrds = [];
+let shDat = {};
+let shCh = null;
+let curSHT = 'all';
+let curTK = 'customer';
+
+if(tok) initD();
+
+async function doLogin(){
+  const em = document.getElementById('em').value;
+  const pw = document.getElementById('pw').value;
+  try{
+    const r = await fetch(API+'/api/v1/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})});
+    const d = await r.json();
+    if(d.access_token){tok=d.access_token;localStorage.setItem('pl_s',tok);initD();}
+    else document.getElementById('lerr').textContent='Invalid credentials';
+  }catch(e){document.getElementById('lerr').textContent='Cannot connect to server';}
+}
+
+function doLogout(){localStorage.removeItem('pl_s');location.reload();}
+
+async function initD(){
+  document.getElementById('lw').classList.add('hidden');
+  document.getElementById('dw').classList.remove('hidden');
+  try{
+    const d = await api('/api/v1/shops');
+    const s = Array.isArray(d)?d:(d.data||[]);
+    if(s.length){curShop=s[0];document.getElementById('shopName').textContent=curShop.name||'Print Lab';}
+  }catch(e){}
+  loadJ();
+  setInterval(loadJ,15000);
+}
+
+async function api(u,m,b){
+  const o={method:m||'GET',headers:{Authorization:'Bearer '+tok}};
+  if(b){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b);}
+  return (await fetch(API+u,o)).json();
+}
+
+function gT(o){
+  const s=JSON.stringify(o).toLowerCase();
+  if(s.includes('colour')||s.includes('color'))return'Colour';
+  if(s.includes('photo'))return'Photo';
+  if(s.includes('tshirt')||s.includes('t-shirt'))return'Tshirt';
+  if(s.includes('project'))return'Project';
+  return'Bw';
+}
+
+function stC(s){return{pending:'st-pending',confirmed:'st-confirmed',completed:'st-completed',cancelled:'st-cancelled'}[s]||'st-pending';}
+function stL(s){return(s||'pending').charAt(0).toUpperCase()+(s||'pending').slice(1);}
+
+async function loadJ(){
+  try{
+    const d = await api('/api/v1/orders');
+    allOrds = Array.isArray(d)?d:(d.items||d.data||d.orders||[]);
+    rJ(allOrds);
+  }catch(e){document.getElementById('jl').innerHTML='<div class="empty">Error loading orders</div>';}
+}
+
+function fj(t,el){
+  document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  if(t==='all'){rJ(allOrds);return;}
+  const m={colour:'colour',photo:'photo',tshirt:'tshirt',project:'project'};
+  rJ(allOrds.filter(o=>JSON.stringify(o).toLowerCase().includes(m[t]||t)));
+}
+
+function rJ(jobs){
+  if(!jobs.length){document.getElementById('jl').innerHTML='<div class="empty">No active jobs</div>';return;}
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('jl').innerHTML=jobs.map(o=>{
+    const dt=new Date(o.created_at);
+    const ds=dt.getDate()+' '+MN[dt.getMonth()]+', '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="ji"><div class="ji-top"><span class="ji-id">'+(o.order_number||o.id?.slice(0,12)||'&mdash;')+'</span><span class="ji-st '+stC(o.status)+'">'+stL(o.status)+'</span></div><div class="ji-name">'+(o.user_name||o.customer_name||'Customer')+'</div><div class="ji-phone">'+(o.user_phone||o.customer_phone||'')+'</div><div class="ji-bot"><span class="ji-file">&#8595; '+(o.file_name||'document.pdf')+'</span><span class="ji-copies">x'+(o.copies||1)+'</span><span class="ji-type">'+TL[gT(o)]+'</span><span class="ji-date">'+ds+'</span></div></div>';
+  }).join('');
+}
+
+/* DROPDOWNS */
+function toggleSD(){document.getElementById('sdrop').classList.toggle('hidden');}
+function closeSD(){document.getElementById('sdrop').classList.add('hidden');}
+function toggleTD(){document.getElementById('tdrop').classList.toggle('hidden');}
+function closeTD(){document.getElementById('tdrop').classList.add('hidden');}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#siBtn'))document.getElementById('sdrop').classList.add('hidden');
+  if(!e.target.closest('#tBtn'))document.getElementById('tdrop').classList.add('hidden');
+});
+
+/* MODALS */
+function oMo(id){document.getElementById(id).classList.remove('hidden');}
+function cMo(id){document.getElementById(id).classList.add('hidden');}
+
+/* DELIVERY TEAM */
+async function openDT(){
+  oMo('dtMo');
+  if(curShop)document.getElementById('dtSub').textContent='People assigned to '+curShop.name+'.';
+  try{
+    const d = await api('/api/v1/delivery-persons');
+    const ag = Array.isArray(d)?d:(d.data||[]);
+    document.getElementById('dtB').innerHTML=ag.length
+      ?ag.map(a=>'<div class="ag"><div class="av">&#128100;</div><div><div class="an">'+a.name+'</div><div class="aa">'+(a.age?'Age '+a.age:'')+'</div><div class="ai"><span>&#128222; '+(a.phone||'&mdash;')+'</span><span>&#128661; '+(a.vehicle_number||'&mdash;')+'</span></div></div></div>').join('')
+      :'<div class="empty">No delivery persons yet</div>';
+  }catch(e){document.getElementById('dtB').innerHTML='<div class="empty">Error loading</div>';}
+}
+
+function openAA(){
+  cMo('dtMo');
+  ['aNm','aAge','aPh','aVeh'].forEach(id=>document.getElementById(id).value='');
+  oMo('aaMo');
+}
+
+async function subAA(){
+  const nm=document.getElementById('aNm').value,ph=document.getElementById('aPh').value;
+  if(!nm||!ph)return alert('Name and phone required');
+  try{
+    await api('/api/v1/delivery-persons?shop_id='+(curShop?curShop.id:'shop-001'),'POST',{name:nm,phone:ph,vehicle_number:document.getElementById('aVeh').value,age:document.getElementById('aAge').value?parseInt(document.getElementById('aAge').value):null});
+    cMo('aaMo');openDT();
+  }catch(e){alert('Error adding person');}
+}
+
+/* PERFORMANCE STATUS */
+async function openPS(){
+  oMo('psMo');
+  try{
+    const d=await api('/api/v1/orders');
+    const all=Array.isArray(d)?d:(d.items||d.data||d.orders||[]);
+    const tot=all.length,pend=all.filter(o=>o.status==='pending').length,proc=all.filter(o=>o.status==='confirmed').length,del=all.filter(o=>['completed','delivered'].includes(o.status)).length;
+    document.getElementById('psS').innerHTML='<div class="psc"><div class="psl">Total Orders</div><div class="psv">'+tot+'</div></div><div class="psc"><div class="psl">Pending</div><div class="psv or">'+pend+'</div></div><div class="psc"><div class="psl">Processing</div><div class="psv bl">'+proc+'</div></div><div class="psc"><div class="psl">Delivered</div><div class="psv gr">'+del+'</div></div>';
+    const tc={Bw:0,Colour:0,Photo:0,Tshirt:0,Project:0},td=new Date().toDateString();
+    all.filter(o=>new Date(o.created_at).toDateString()===td).forEach(o=>{const t=gT(o);if(tc[t]!==undefined)tc[t]+=(parseFloat(o.grand_total)||0);});
+    const mx=Math.max(...Object.values(tc),1);
+    document.getElementById('psB').innerHTML=TN.map(t=>'<div class="eb"><div class="ebd" style="background:'+TC[t]+'"></div><div class="ebl">'+TL[t]+'</div><div class="ebtr"><div class="ebf" style="width:'+(tc[t]/mx*100)+'%;background:'+TC[t]+'"></div></div><div class="ebv" style="color:'+TC[t]+'">&#8377;'+tc[t]+'</div></div>').join('');
+    bShD(all);
+  }catch(e){document.getElementById('psS').innerHTML='<div class="empty">Error loading</div>';}
+}
+
+/* BUILD SALES DATA */
+function bShD(all){
+  const today=new Date();today.setHours(0,0,0,0);
+  const days=Array.from({length:8},(_,i)=>{const dt=new Date(today);dt.setDate(dt.getDate()-(7-i));return dt;});
+  const db=days.map(day=>{
+    const ds=day.toDateString();
+    const dO=all.filter(o=>new Date(o.created_at).toDateString()===ds);
+    const res={date:day,Bw:0,Colour:0,Photo:0,Tshirt:0,Project:0,total:0};
+    dO.forEach(o=>{const t=gT(o);if(res[t]!==undefined){res[t]+=(parseFloat(o.grand_total)||0);res.total+=(parseFloat(o.grand_total)||0);}});
+    return res;
+  });
+  shDat={db};
+}
+
+/* SALES HISTORY */
+async function openSH(){
+  cMo('psMo');oMo('shMo');
+  if(!shDat.db){try{const d=await api('/api/v1/orders');bShD(Array.isArray(d)?d:(d.items||d.data||d.orders||[]));}catch(e){}}
+  // reset tabs
+  document.querySelectorAll('.shtab').forEach(t=>{t.style.background='';t.style.color='';t.style.borderColor='';});
+  const f=document.querySelector('.shtab');if(f){f.style.background='#1a1a1a';f.style.color='#fff';f.style.borderColor='#1a1a1a';}
+  curSHT='all';rSH('all');
+}
+
+function shF(type,el){
+  document.querySelectorAll('.shtab').forEach(t=>{t.style.background='';t.style.color='';t.style.borderColor='';});
+  const col=type==='all'?'#1a1a1a':(TC[type]||'#1a1a1a');
+  el.style.background=col;el.style.color='#fff';el.style.borderColor=col;
+  curSHT=type;rSH(type);
+}
+
+function rSH(type){
+  if(!shDat.db)return;
+  const db=shDat.db;
+  const vals=type==='all'?db.map(d=>d.total):db.map(d=>d[type]||0);
+  const tv=vals[7]||0,tot=vals.reduce((a,b)=>a+b,0),avg=tot/8;
+  const col=type==='all'?'#3b82f6':(TC[type]||'#3b82f6');
+  document.getElementById('shT').textContent='&#8377;'+tv.toFixed(0);
+  document.getElementById('shT').style.color=col;
+  document.getElementById('sh8').textContent='&#8377;'+tot.toFixed(0);
+  document.getElementById('shA').textContent='&#8377;'+avg.toFixed(0);
+  document.getElementById('shCT').textContent='Sales Over Time \u2014 '+(type==='all'?'All Types':TL[type]);
+  const ctx=document.getElementById('shC').getContext('2d');
+  if(shCh)shCh.destroy();
+  shCh=new Chart(ctx,{type:'bar',data:{labels:db.map((_,i)=>'Day '+(i+1)),datasets:[{label:type==='all'?'All':TL[type],data:vals,backgroundColor:col,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'\u20b9'+v},grid:{color:'#f0f0f0'}}}}});
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('shH').innerHTML=db.slice().reverse().map((d,ri)=>{
+    const i=7-ri;const dt=d.date;
+    const dv=type==='all'?d.total:(d[type]||0);
+    const dots=TN.map(t=>'<span class="dhdot"><span class="dhdc" style="background:'+TC[t]+'"></span>'+TL[t]+' &#8377;'+(d[t]||0)+'</span>').join('');
+    return '<div class="dhr"><div><div class="dhd">Day '+(i+1)+'</div><div class="dhdt">'+dt.getDate()+' '+MN[dt.getMonth()]+'</div><div class="dhdots">'+dots+'</div></div><div class="dhv" style="color:'+col+'">&#8377;'+dv.toFixed(0)+'</div></div>';
+  }).join('');
+}
+
+/* TICKET */
+const TKM={customer:{t:'Customer Ticket Raise',s:'Raise a customer support ticket'},stock:{t:'Stock Ticket Raise',s:'Report a stock or supply issue'},technical:{t:'Technical Issue',s:'Report a technical problem'}};
+function openTK(type){
+  curTK=type;closeTD();
+  const m=TKM[type];
+  document.getElementById('tkT').textContent=m.t;
+  document.getElementById('tkS').textContent=m.s+(curShop?' for '+curShop.name:'');
+  ['tBy','tSj','tDt'].forEach(id=>document.getElementById(id).value='');
+  oMo('tkMo');
+}
+async function subTK(){
+  const by=document.getElementById('tBy').value,sj=document.getElementById('tSj').value;
+  if(!by||!sj)return alert('Fill Raised By and Subject');
+  try{
+    await api('/api/v1/tickets','POST',{subject:sj,description:document.getElementById('tDt').value,priority:curTK==='technical'?'high':'medium',category:curTK,raised_by:by,shop_id:curShop?curShop.id:null});
+    cMo('tkMo');alert('Ticket raised successfully!');
+  }catch(e){alert('Error raising ticket');}
+}
+</script>
+</body>
+</html>
+

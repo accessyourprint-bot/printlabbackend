@@ -1,0 +1,2 @@
+import base64,os
+path=r'static\full_control.html'

@@ -1,0 +1,7 @@
+import base64
+p=r'C:\Users\Shiva\Downloads\altprint-backend (6)\altprint\static\full_control.html'
+d=''
+d+='PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCxpbml0aWFsLXNjYWxlPTEuMCI+Cjx0aXRsZT5QcmludExhYiBBZG1pbjwvdGl0bGU+'
+d+='CjxzdHlsZT4KKnttYXJnaW46MDtwYWRkaW5nOjA7Ym94LXNpemluZzpib3JkZXItYm94O30KYm9keXtmb250LWZhbWlseToiU2Vnb2UgVUkiLHN5c3RlbS11aSxzYW5zLXNlcmlmO2JhY2tncm91bmQ6I2YwZjJmNTtjb2xvcjojMWUyOTNiO2Rpc3BsYXk6ZmxleDttaW4taGVpZ2h0OjEwMHZoO30='
+open(p,'wb').write(base64.b64decode(d))
+import os;print('size:',os.path.getsize(p))

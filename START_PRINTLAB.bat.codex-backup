@@ -1,0 +1,38 @@
+@echo off
+echo Starting PrintLab Backend...
+cd "C:\Users\Shiva\Downloads\altprint-backend (6)\altprint"
+
+:: Start Docker Desktop
+start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+echo Waiting for Docker...
+timeout /t 30 /nobreak >nul
+
+:: Start Postgres + Redis
+docker compose up postgres redis -d
+
+:: Start Backend
+start "PrintLab Backend" cmd /k "cd /d C:\Users\Shiva\Downloads\altprint-backend (6)\altprint && set PYTHONPATH=. && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+:: Wait for backend
+timeout /t 15 /nobreak >nul
+
+:: Fix login if broken
+docker exec altprint_postgres psql -U altprint -d altprint_db -c "UPDATE feature_flags SET enabled = true WHERE feature_name = 'login_register'; UPDATE system_config SET login_enabled = true, app_enabled = true, maintenance_mode = false, emergency_lock = false WHERE id = 1;"
+
+:: Start ngrok
+start "PrintLab ngrok" cmd /k "C:\Users\Shiva\AppData\Local\Microsoft\WinGet\Packages\Ngrok.Ngrok_Microsoft.Winget.Source_8wekyb3d8bbwe\ngrok.exe http 8000"
+
+:: Open both URLs
+timeout /t 5 /nobreak >nul
+start http://127.0.0.1:8000/full
+start http://127.0.0.1:8000/shop
+
+echo.
+echo PrintLab is READY!
+echo Admin panel : http://127.0.0.1:8000/full
+echo Outlet panel: http://127.0.0.1:8000/shop
+echo.
+pause
+
+:: Fix credentials
+docker exec altprint_postgres psql -U altprint -d altprint_db -c "UPDATE feature_flags SET enabled = true WHERE feature_name = 'login_register'; UPDATE system_config SET login_enabled = true, app_enabled = true, maintenance_mode = false, emergency_lock = false WHERE id = 1;"

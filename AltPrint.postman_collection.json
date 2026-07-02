@@ -1,0 +1,273 @@
+{
+  "info": {
+    "name": "Alt Print API",
+    "description": "Complete API collection for Alt Print backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8000/api/v1"},
+    {"key": "access_token", "value": ""},
+    {"key": "refresh_token", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "body": {"mode": "raw", "raw": "{\"email\": \"user@example.com\", \"password\": \"Password@123\", \"full_name\": \"Test User\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Login (Super Admin)",
+          "event": [{"listen": "test", "script": {"exec": ["var r = pm.response.json(); pm.collectionVariables.set('access_token', r.access_token); pm.collectionVariables.set('refresh_token', r.refresh_token);"]}}],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "body": {"mode": "raw", "raw": "{\"email\": \"admin@altprint.in\", \"password\": \"AltPrint2024!\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/refresh",
+            "body": {"mode": "raw", "raw": "{\"refresh_token\": \"{{refresh_token}}\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "System Config",
+      "item": [
+        {
+          "name": "Get System Config",
+          "request": {"method": "GET", "url": "{{base_url}}/system/config"}
+        },
+        {
+          "name": "Update System Config",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/system/config",
+            "body": {"mode": "raw", "raw": "{\"app_enabled\": true, \"maintenance_mode\": false, \"emergency_lock\": false}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Toggle Maintenance",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/system/maintenance?enabled=true",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "Emergency Lock",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/system/emergency?locked=true",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feature Flags",
+      "item": [
+        {
+          "name": "Get Global Features",
+          "request": {"method": "GET", "url": "{{base_url}}/features"}
+        },
+        {
+          "name": "Get Shop Features",
+          "request": {"method": "GET", "url": "{{base_url}}/features?shop_id=shop-001"}
+        },
+        {
+          "name": "Toggle Feature",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/features/toggle",
+            "body": {"mode": "raw", "raw": "{\"feature_name\": \"black_white_print\", \"enabled\": false}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Enable Feature",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/features/enable?feature_name=color_print",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "Disable Shop Feature",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/features/disable?feature_name=delivery&shop_id=shop-001",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shops",
+      "item": [
+        {
+          "name": "List Shops",
+          "request": {"method": "GET", "url": "{{base_url}}/shops"}
+        },
+        {
+          "name": "Create Shop",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/shops",
+            "body": {"mode": "raw", "raw": "{\"name\": \"PrintZone - Whitefield\", \"owner_name\": \"Raj Kumar\", \"owner_email\": \"whitefield@altprint.in\", \"owner_phone\": \"+919876543210\", \"address\": \"100 Whitefield Main Road\", \"city\": \"Bengaluru\", \"state\": \"Karnataka\", \"pincode\": \"560066\", \"delivery_radius_km\": 5.0, \"admin_password\": \"Shop@Admin123\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Get Shop",
+          "request": {"method": "GET", "url": "{{base_url}}/shops/shop-001"}
+        },
+        {
+          "name": "Enable Shop",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/shops/shop-003/enable",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "Disable Shop",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/shops/shop-003/disable",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/files/upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "file", "type": "file", "src": "/path/to/document.pdf"},
+                {"key": "print_color", "value": "black_white"},
+                {"key": "copies", "value": "2"},
+                {"key": "is_front_back", "value": "false"},
+                {"key": "spiral_binding", "value": "false"}
+              ]
+            },
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "List My Files",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/files/my",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Calculate Price",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders/calculate-price",
+            "body": {"mode": "raw", "raw": "{\"shop_id\": \"shop-001\", \"files\": [{\"page_count\": 10, \"print_color\": \"black_white\", \"copies\": 2, \"is_front_back\": false, \"spiral_binding\": false}], \"delivery_type\": \"self_pickup\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "body": {"mode": "raw", "raw": "{\"shop_id\": \"shop-001\", \"file_ids\": [\"FILE_UUID_HERE\"], \"file_customizations\": {\"FILE_UUID_HERE\": {\"print_color\": \"black_white\", \"copies\": 1, \"is_front_back\": false, \"spiral_binding\": false}}, \"delivery_type\": \"self_pickup\", \"delivery_distance_km\": null}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/payments/create",
+            "body": {"mode": "raw", "raw": "{\"order_id\": \"ORDER_UUID_HERE\", \"method\": \"upi\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        },
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/payments/verify",
+            "body": {"mode": "raw", "raw": "{\"razorpay_order_id\": \"order_xxx\", \"razorpay_payment_id\": \"pay_xxx\", \"razorpay_signature\": \"sig_xxx\"}", "options": {"raw": {"language": "json"}}},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}, {"key": "Content-Type", "value": "application/json"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Log",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/audit?page=1&per_page=50", "host": ["{{base_url}}"], "path": ["audit"], "query": [{"key": "page", "value": "1"}, {"key": "per_page", "value": "50"}]},
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {"method": "GET", "url": "http://localhost:8000/health"}
+        }
+      ]
+    }
+  ]
+}

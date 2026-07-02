@@ -1,0 +1,229 @@
+"""
+PrintLab - Main Application Entry Point
+FastAPI app with all routers, middleware, and startup events
+"""
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
+from app.core.config import settings
+from app.db.database import init_db
+from app.middleware.security import (
+    RateLimitMiddleware,
+    RequestLoggingMiddleware,
+    SecurityHeadersMiddleware,
+)
+
+# # Import all routers
+from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.system import router as system_router
+from app.api.v1.endpoints.features import router as features_router
+from app.api.v1.endpoints.shops import router as shops_router
+from app.api.v1.endpoints.files import router as files_router
+from app.api.v1.endpoints.orders import router as orders_router
+from app.api.v1.endpoints.payments import router as payments_router
+from app.api.v1.endpoints.audit import router as audit_router
+from app.api.v1.endpoints.admin import router as admin_router
+from app.api.v1.endpoints.projects import router as projects_router
+from app.api.v1.endpoints.project_approval import router as project_approval_router
+from app.api.v1.endpoints.stock import router as stock_router
+from app.api.v1.endpoints.tickets import router as tickets_router
+from app.api.v1.endpoints.delivery import router as delivery_router
+from app.api.v1.endpoints.analytics import router as analytics_router, pricing_router
+from app.api.v1.websocket.ws import router as ws_router
+
+logging.basicConfig(
+    level=logging.DEBUG if settings.DEBUG else logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup and shutdown events"""
+    logger.info("ðŸš€ PrintLab Backend starting up...")
+
+    # Initialize database tables
+    try:
+        await init_db()
+        logger.info("âœ… Database initialized")
+    except Exception as e:
+        logger.error(f"âŒ Database initialization failed: {e}")
+
+    # Seed super admin and default data
+    try:
+        await seed_initial_data()
+        logger.info("âœ… Initial data seeded")
+    except Exception as e:
+        logger.warning(f"âš ï¸  Seed data warning: {e}")
+
+    logger.info("âœ… PrintLab Backend is ready")
+    yield
+
+    logger.info("ðŸ›‘ PrintLab Backend shutting down...")
+
+
+async def seed_initial_data():
+    """Seed super admin user and default system config"""
+    from sqlalchemy import select
+    from app.db.database import AsyncSessionLocal
+    from app.models.models import FeatureFlag, SystemConfig, User
+    from app.core.security import hash_password
+
+    async with AsyncSessionLocal() as db:
+        # Create system config if not exists
+        config_result = await db.execute(select(SystemConfig).where(SystemConfig.id == 1))
+        if not config_result.scalar_one_or_none():
+            config = SystemConfig(
+                id=1,
+                app_enabled=True,
+                maintenance_mode=False,
+                emergency_lock=False,
+                uploads_enabled=True,
+                payments_enabled=True,
+                delivery_enabled=True,
+                printing_enabled=True,
+                login_enabled=True,
+                orders_enabled=True,
+            )
+            db.add(config)
+
+        # Create super admin if not exists
+        admin_result = await db.execute(
+            select(User).where(User.email == settings.SUPER_ADMIN_EMAIL)
+        )
+        if not admin_result.scalar_one_or_none():
+            admin = User(
+                email=settings.SUPER_ADMIN_EMAIL,
+                hashed_password=hash_password(settings.SUPER_ADMIN_PASSWORD),
+                full_name="Super Admin",
+                role="super_admin",
+                is_active=True,
+                is_verified=True,
+            )
+            db.add(admin)
+            logger.info(f"âœ… Super admin created: {settings.SUPER_ADMIN_EMAIL}")
+
+        # Create default global feature flags
+        default_features = [
+            ("black_white_print", "Black & White Printing"),
+            ("color_print", "Color Printing"),
+            ("spiral_binding", "Spiral Binding"),
+            ("delivery", "Delivery"),
+            ("front_back_printing", "Front/Back Printing"),
+            ("bulk_orders", "Bulk Orders"),
+            ("payment_upi", "UPI Payment"),
+            ("payment_card", "Card Payment"),
+            ("payment_cod", "Cash on Delivery"),
+            ("login_register", "Login / Register"),
+        ]
+
+        for feature_name, label in default_features:
+            existing = await db.execute(
+                select(FeatureFlag).where(
+                    FeatureFlag.feature_name == feature_name,
+                    FeatureFlag.scope == "global",
+                    FeatureFlag.shop_id == None,
+                )
+            )
+            if not existing.scalar_one_or_none():
+                flag = FeatureFlag(
+                    feature_name=feature_name,
+                    label=label,
+                    enabled=True,
+                    scope="global",
+                    shop_id=None,
+                )
+                db.add(flag)
+
+        await db.commit()
+
+
+# ============================================================
+# CREATE FASTAPI APP
+# ============================================================
+app = FastAPI(
+    title="PrintLab API",
+    description="Production-grade backend for PrintLab mobile application",
+    version="1.0.0",
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
+    openapi_url="/openapi.json" if settings.DEBUG else None,
+    lifespan=lifespan,
+)
+
+# ============================================================
+# MIDDLEWARE (order matters - outermost first)
+# ============================================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins_list,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+)
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitMiddleware)
+# DISABLED MAINTENANCE MIDDLEWARE
+app.add_middleware(RequestLoggingMiddleware)
+
+# # ============================================================
+# # ROUTERS
+# # ============================================================
+API_PREFIX = "/api/v1"
+
+app.include_router(auth_router, prefix=API_PREFIX)
+app.include_router(system_router, prefix=API_PREFIX)
+app.include_router(features_router, prefix=API_PREFIX)
+app.include_router(shops_router, prefix=API_PREFIX)
+app.include_router(files_router, prefix=API_PREFIX)
+app.include_router(projects_router, prefix=API_PREFIX)
+app.include_router(project_approval_router, prefix=API_PREFIX)
+app.include_router(stock_router, prefix=API_PREFIX)
+app.include_router(tickets_router, prefix=API_PREFIX)
+app.include_router(delivery_router, prefix=API_PREFIX)
+app.include_router(analytics_router, prefix=API_PREFIX)
+app.include_router(pricing_router, prefix=API_PREFIX)
+app.include_router(orders_router, prefix=API_PREFIX)
+app.include_router(payments_router, prefix=API_PREFIX)
+app.include_router(audit_router, prefix=API_PREFIX)
+app.include_router(admin_router, prefix=API_PREFIX)
+app.include_router(ws_router)  # WebSocket at root /ws
+
+
+# # ============================================================
+# # HEALTH CHECK
+# # ============================================================
+@app.get("/health", tags=["Health"], include_in_schema=False)
+async def health_check():
+    """Health check endpoint for load balancers"""
+    return {
+        "status": "healthy",
+        "app": settings.APP_NAME,
+        "version": "1.0.0",
+        "environment": settings.APP_ENV,
+    }
+
+
+@app.get("/", tags=["Root"], include_in_schema=False)
+async def root():
+    return {"message": f"{settings.APP_NAME} API is running"}
+
+# ── OWNER CONTROL PANELS ────────────────────────────────────────────
+from pathlib import Path as _Path
+from fastapi.responses import HTMLResponse as _HTMLResponse
+
+_STATIC_DIR = _Path(__file__).resolve().parent.parent / "static"
+
+@app.get("/full", response_class=_HTMLResponse, include_in_schema=False)
+async def full_control_page():
+    return (_STATIC_DIR / "full_control.html").read_text(encoding="utf-8")
+
+@app.get("/shop", response_class=_HTMLResponse, include_in_schema=False)
+async def shop_control_page():
+    return (_STATIC_DIR / "specific_control.html").read_text(encoding="utf-8")

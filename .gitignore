@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Test cache
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+
+# Local storage
+.local_storage/
+
+# Database
+*.db
+*.sqlite3
+
+# SQL backups
+*.sql
+
+# GitHub OS files
+.DS_Store
+Thumbs.db
+
+# Backup folders
+*_backup*/
+*backup*/
+master_backup/
+old_scripts/
+script_history/
