@@ -5,13 +5,13 @@ Shop admins manage their own delivery staff; super admin manages all.
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import require_role
 from app.db.database import get_db
-from app.models.models import DeliveryPerson, User
-from app.schemas.schemas import APIResponse, DeliveryPersonCreate, DeliveryPersonOut, DeliveryPersonUpdate
+from app.models.models import DeliveryPerson, Order, User
+from app.schemas.schemas import APIResponse, DeliveryPersonCreate, DeliveryPersonOut, DeliveryPersonUpdate, DeliveryPersonWithCountOut
 
 router = APIRouter(prefix="/delivery-persons", tags=["Delivery"])
 
@@ -32,6 +32,36 @@ async def list_delivery_persons(
     result = await db.execute(query.order_by(DeliveryPerson.name))
     persons = result.scalars().all()
     return [DeliveryPersonOut.model_validate(p) for p in persons]
+
+
+@router.get("/with-order-counts", response_model=List[DeliveryPersonWithCountOut])
+async def list_delivery_persons_with_counts(
+    shop_id: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("super_admin", "shop_admin")),
+):
+    """List delivery persons along with how many orders each has been assigned."""
+    query = select(DeliveryPerson)
+    if current_user.role == "shop_admin":
+        query = query.where(DeliveryPerson.shop_id == current_user.shop_id)
+    elif shop_id:
+        query = query.where(DeliveryPerson.shop_id == shop_id)
+    result = await db.execute(query.order_by(DeliveryPerson.name))
+    persons = result.scalars().all()
+
+    count_result = await db.execute(
+        select(Order.delivery_person_id, func.count(Order.id))
+        .where(Order.delivery_person_id.isnot(None))
+        .group_by(Order.delivery_person_id)
+    )
+    counts = dict(count_result.all())
+
+    out = []
+    for p in persons:
+        item = DeliveryPersonWithCountOut.model_validate(p)
+        item.order_count = counts.get(p.id, 0)
+        out.append(item)
+    return out
 
 
 @router.post("", response_model=APIResponse, status_code=201)

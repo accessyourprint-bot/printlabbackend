@@ -129,6 +129,18 @@ class FeatureFlag(Base):
     )
 
 
+class AppAppearance(Base):
+    __tablename__ = "app_appearance"
+
+    id = Column(Integer, primary_key=True, default=1)
+    primary_color = Column(String(20), nullable=False, default="#ff5722")
+    secondary_color = Column(String(20), nullable=False, default="#1a223e")
+    font_family = Column(String(50), nullable=False, default="Inter")
+    logo_url = Column(String(500), nullable=True)
+    banner_text = Column(String(255), nullable=False, default="PrintLab")
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+
+
 # ============================================================
 # AUDIT LOG MODEL
 # ============================================================
@@ -174,6 +186,7 @@ class Order(Base):
     delivery_lat = Column(Float, nullable=True)
     delivery_lng = Column(Float, nullable=True)
     delivery_distance_km = Column(Float, nullable=True)
+    delivery_person_id = Column(UUID(as_uuid=True), ForeignKey("delivery_persons.id"), nullable=True)
     special_instructions = Column(Text, nullable=True)
 
     # Pricing breakdown
@@ -184,6 +197,8 @@ class Order(Base):
     subtotal = Column(Numeric(10, 2), default=0)
     gst_amount = Column(Numeric(10, 2), default=0)
     grand_total = Column(Numeric(10, 2), default=0)
+
+    is_downloaded = Column(Boolean, default=False, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -248,6 +263,19 @@ class OrderFile(Base):
 # ============================================================
 # PAYMENT MODEL
 # ============================================================
+
+class ShopShowcase(Base):
+    __tablename__ = "shop_showcase"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    shop_id = Column(String(50), ForeignKey("shops.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    storage_key = Column(String(500), nullable=False)
+    nonce = Column(String(100), nullable=False)
+    original_filename = Column(String(500), nullable=False)
+    content_type = Column(String(100), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class Payment(Base):
     __tablename__ = "payments"
 
@@ -334,6 +362,8 @@ class SupportTicket(Base):
     status = Column(String(20), nullable=False, default="open")
     priority = Column(String(20), nullable=False, default="normal")
     admin_response = Column(String(2000), nullable=True)
+    image_url = Column(String(500), nullable=True)
+    raised_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     resolved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
@@ -349,6 +379,9 @@ class DeliveryPerson(Base):
     vehicle_number = Column(String(50), nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
     current_status = Column(String(20), nullable=False, default="available")
+    current_lat = Column(Float, nullable=True)
+    current_lng = Column(Float, nullable=True)
+    location_updated_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

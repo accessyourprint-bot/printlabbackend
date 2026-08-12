@@ -8,9 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.v1.deps import get_client_ip, require_role
+from app.core.security import hash_password
 from app.db.database import get_db
 from app.models.models import Order, Shop, SystemConfig, User
-from app.schemas.schemas import APIResponse, AdminOverviewOut, AdminUserOut, ShopOut, SystemConfigOut
+from app.schemas.schemas import APIResponse, AdminOverviewOut, AdminUserOut, CreateShopLoginRequest, ShopOut, SystemConfigOut
+from app.core.security import hash_password
 from app.services.audit import log_action
 
 router = APIRouter(prefix="/admin", tags=["Admin Control"])
@@ -53,6 +55,46 @@ async def owner_overview(
         },
         shops=shops,
     )
+
+
+@router.post("/create-shop-login", response_model=APIResponse)
+async def create_shop_login(
+    body: CreateShopLoginRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("super_admin")),
+):
+    """Create a proper shop_admin login account tied to a shop (used by Add Outlet)."""
+    shop_result = await db.execute(select(Shop).where(Shop.id == body.shop_id))
+    if not shop_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Shop not found")
+
+    existing = await db.execute(select(User).where(User.email == body.email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="A login with this email already exists")
+
+    user = User(
+        email=body.email,
+        hashed_password=hash_password(body.password),
+        full_name=body.full_name,
+        role="shop_admin",
+        shop_id=body.shop_id,
+        is_active=True,
+    )
+    db.add(user)
+    await db.flush()
+
+    await log_action(
+        db,
+        actor=str(current_user.email),
+        action="CREATE_SHOP_LOGIN",
+        target=str(user.id),
+        details={"shop_id": body.shop_id, "email": body.email},
+        role=current_user.role,
+        ip_address=get_client_ip(request),
+    )
+
+    return APIResponse(message="Shop login created successfully")
 
 
 @router.get("/users", response_model=list[AdminUserOut])
@@ -101,6 +143,39 @@ async def toggle_user_status(
     )
 
     return APIResponse(message=f"User {'enabled' if enabled else 'disabled'} successfully")
+
+
+@router.patch("/users/{user_id}/reset-password", response_model=APIResponse)
+async def reset_user_password(
+    user_id: str,
+    new_password: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("super_admin")),
+):
+    """Reset a specific user's password (admin action)."""
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.hashed_password = hash_password(new_password)
+    await db.flush()
+
+    await log_action(
+        db,
+        actor=str(current_user.email or current_user.phone),
+        action="RESET_USER_PASSWORD",
+        target=str(user.id),
+        details={},
+        role=current_user.role,
+        ip_address=get_client_ip(request),
+    )
+
+    return APIResponse(message="Password reset successfully")
 
 
 @router.get("/owner/config", response_model=SystemConfigOut)

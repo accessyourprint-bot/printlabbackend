@@ -5,7 +5,7 @@ Create, read, update, delete, enable/disable shops
 import secrets
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Body
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -260,3 +260,35 @@ async def delete_shop(
                      details=shop_name, role=current_user.role, ip_address=get_client_ip(request))
 
     return APIResponse(message=f"Shop '{shop_name}' deleted")
+
+
+@router.patch("/{shop_id}/reset-password", response_model=APIResponse)
+async def reset_shop_password(
+    shop_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("super_admin")),
+    new_password: Optional[str] = Body(default=None, embed=True),
+):
+    """Reset the shop owner's login password to a new random password."""
+    result = await db.execute(select(Shop).where(Shop.id == shop_id))
+    shop = result.scalar_one_or_none()
+    if not shop:
+        raise HTTPException(status_code=404, detail="Shop not found")
+
+    user_result = await db.execute(select(User).where(User.shop_id == shop_id))
+    user = user_result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="No login account found for this shop")
+
+    if new_password:
+        if len(new_password) < 6:
+            raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    else:
+        new_password = secrets.token_urlsafe(9)
+    user.hashed_password = hash_password(new_password)
+    await db.flush()
+
+    await log_action(db, str(current_user.email), "RESET_SHOP_PASSWORD", shop_id,
+                     details=shop.name, role=current_user.role, ip_address=get_client_ip(request))
+    return APIResponse(message=f"Password reset for '{shop.name}'", data={"new_password": new_password})

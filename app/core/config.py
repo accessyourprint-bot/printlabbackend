@@ -73,8 +73,8 @@ class Settings(BaseSettings):
     SUPER_ADMIN_PASSWORD: str = "AltPrint2024!"
 
     # --- Rate Limiting ---
-    RATE_LIMIT_PER_MINUTE: int = 60
-    LOGIN_RATE_LIMIT_PER_MINUTE: int = 5
+    RATE_LIMIT_PER_MINUTE: int = 3000
+    LOGIN_RATE_LIMIT_PER_MINUTE: int = 100
 
     @property
     def allowed_origins_list(self) -> List[str]:

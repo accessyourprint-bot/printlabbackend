@@ -32,6 +32,8 @@ async def create_ticket(
         subject=body.subject,
         description=body.description,
         priority=body.priority,
+        image_url=body.image_url,
+        raised_by=body.raised_by,
     )
     db.add(ticket)
     await db.flush()

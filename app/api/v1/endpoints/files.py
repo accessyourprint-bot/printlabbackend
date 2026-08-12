@@ -13,10 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1.deps import get_client_ip, get_current_user, require_role
 from app.core.config import settings
 from app.db.database import get_db
-from app.models.models import OrderFile, SystemConfig, User
+from app.models.models import Order, OrderFile, SystemConfig, User
+from fastapi.responses import StreamingResponse
+import io
 from app.schemas.schemas import APIResponse, FileCustomization, OrderFileOut
 from app.services.page_counter import count_pages
-from app.services.storage import delete_file_from_storage, upload_encrypted_file
+from app.services.storage import delete_file_from_storage, download_decrypted_file, upload_encrypted_file
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -235,6 +237,100 @@ async def list_my_files(
     )
     files = result.scalars().all()
     return [OrderFileOut.model_validate(f) for f in files]
+
+
+@router.get("/{file_id}/download")
+async def download_file(
+    file_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download and decrypt a file. Owner, shop admin of that order's shop, or super admin only."""
+    result = await db.execute(select(OrderFile).where(OrderFile.id == file_id))
+    order_file = result.scalar_one_or_none()
+    if not order_file:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    if current_user.role == "user" and order_file.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if current_user.role == "shop_admin":
+        if not order_file.order_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        order_result = await db.execute(select(Order).where(Order.id == order_file.order_id))
+        order = order_result.scalar_one_or_none()
+        if not order or order.shop_id != current_user.shop_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        file_bytes = await download_decrypted_file(order_file.storage_key, order_file.nonce)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not retrieve file")
+
+    if order_file.order_id:
+        mark_result = await db.execute(select(Order).where(Order.id == order_file.order_id))
+        mark_order = mark_result.scalar_one_or_none()
+        if mark_order and not mark_order.is_downloaded:
+            mark_order.is_downloaded = True
+            await db.commit()
+
+    return StreamingResponse(
+        io.BytesIO(file_bytes),
+        media_type=order_file.content_type or "application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{order_file.original_filename}"'},
+    )
+
+@router.get("/orders/{order_id}/download-all")
+async def download_all_files_for_order(
+    order_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download all files for an order as a single zip. Owner, shop admin of that order's shop, or super admin only."""
+    import zipfile
+
+    order_result = await db.execute(select(Order).where(Order.id == order_id))
+    order = order_result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if current_user.role == "user" and order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if current_user.role == "shop_admin" and order.shop_id != current_user.shop_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    files_result = await db.execute(select(OrderFile).where(OrderFile.order_id == order_id))
+    order_files = files_result.scalars().all()
+    if not order_files:
+        raise HTTPException(status_code=404, detail="No files found for this order")
+
+    if not order.is_downloaded:
+        order.is_downloaded = True
+        await db.commit()
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        used_names = set()
+        for f in order_files:
+            try:
+                file_bytes = await download_decrypted_file(f.storage_key, f.nonce)
+            except Exception:
+                continue
+            name = f.original_filename or f"file_{f.id}"
+            base_name = name
+            counter = 1
+            while name in used_names:
+                stem, dot, ext = base_name.rpartition(".")
+                name = f"{stem}_{counter}.{ext}" if dot else f"{base_name}_{counter}"
+                counter += 1
+            used_names.add(name)
+            zf.writestr(name, file_bytes)
+
+    zip_buffer.seek(0)
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{order.order_number}_documents.zip"'},
+    )
 
 
 @router.delete("/{file_id}", response_model=APIResponse)

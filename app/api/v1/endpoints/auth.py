@@ -191,6 +191,7 @@ async def login(
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         role=user.role,
         user_id=str(user.id),
+        shop_id=user.shop_id,
     )
 
 
@@ -274,6 +275,7 @@ async def refresh_tokens(
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         role=user.role,
         user_id=str(user.id),
+        shop_id=user.shop_id,
     )
 
 

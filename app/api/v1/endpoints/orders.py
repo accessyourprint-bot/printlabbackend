@@ -271,18 +271,18 @@ async def list_orders(
 ):
     """List orders. Users see their own; shop admins see their shop's orders."""
     if current_user.role == "super_admin":
-        query = select(Order).options(selectinload(Order.files)).order_by(Order.created_at.desc())
+        query = select(Order).options(selectinload(Order.files), selectinload(Order.user)).order_by(Order.created_at.desc())
     elif current_user.role == "shop_admin":
         query = (
             select(Order)
-            .options(selectinload(Order.files))
+            .options(selectinload(Order.files), selectinload(Order.user))
             .where(Order.shop_id == current_user.shop_id)
             .order_by(Order.created_at.desc())
         )
     else:
         query = (
             select(Order)
-            .options(selectinload(Order.files))
+            .options(selectinload(Order.files), selectinload(Order.user))
             .where(Order.user_id == current_user.id)
             .order_by(Order.created_at.desc())
         )
@@ -292,7 +292,11 @@ async def list_orders(
     out = []
     for o in orders:
         try:
-            out.append(OrderOut.model_validate(o))
+            item = OrderOut.model_validate(o)
+            if o.user:
+                item.customer_name = o.user.full_name or o.user.email or None
+                item.customer_phone = o.user.phone or None
+            out.append(item)
         except Exception as e:
             import traceback
             print(f"ORDER VALIDATION ERROR for {o.id}: {e}")
@@ -309,7 +313,7 @@ async def get_order(
     """Get a specific order with all file details"""
     result = await db.execute(
         select(Order)
-        .options(selectinload(Order.files))
+        .options(selectinload(Order.files), selectinload(Order.user))
         .where(Order.id == order_id)
     )
     order = result.scalar_one_or_none()
@@ -330,6 +334,7 @@ async def update_order_status(
     order_id: UUID,
     new_status: str,
     request: Request,
+    delivery_person_id: str | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("super_admin", "shop_admin")),
 ):
@@ -347,6 +352,8 @@ async def update_order_status(
         raise HTTPException(status_code=403, detail="Access denied")
 
     order.status = new_status
+    if new_status == "out_for_delivery" and delivery_person_id:
+        order.delivery_person_id = delivery_person_id
     await db.flush()
 
     # Broadcast real-time update to the user

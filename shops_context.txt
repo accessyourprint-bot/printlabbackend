@@ -1,0 +1,27 @@
+﻿
+> app\api\v1\endpoints\shops.py:266:async def reset_shop_password(
+  app\api\v1\endpoints\shops.py:267:    shop_id: str,
+  app\api\v1\endpoints\shops.py:268:    request: Request,
+  app\api\v1\endpoints\shops.py:269:    db: AsyncSession = Depends(get_db),
+  app\api\v1\endpoints\shops.py:270:    current_user: User = Depends(require_role("super_admin")),
+  app\api\v1\endpoints\shops.py:271:):
+  app\api\v1\endpoints\shops.py:272:    """Reset the shop owner's login password to a new random password."""
+  app\api\v1\endpoints\shops.py:273:    result = await db.execute(select(Shop).where(Shop.id == shop_id))
+  app\api\v1\endpoints\shops.py:274:    shop = result.scalar_one_or_none()
+  app\api\v1\endpoints\shops.py:275:    if not shop:
+  app\api\v1\endpoints\shops.py:276:        raise HTTPException(status_code=404, detail="Shop not found")
+  app\api\v1\endpoints\shops.py:277:
+  app\api\v1\endpoints\shops.py:278:    user_result = await db.execute(select(User).where(User.shop_id == shop_id))
+  app\api\v1\endpoints\shops.py:279:    user = user_result.scalar_one_or_none()
+  app\api\v1\endpoints\shops.py:280:    if not user:
+  app\api\v1\endpoints\shops.py:281:        raise HTTPException(status_code=404, detail="No login account found for this shop")
+  app\api\v1\endpoints\shops.py:282:
+  app\api\v1\endpoints\shops.py:283:    new_password = secrets.token_urlsafe(9)
+  app\api\v1\endpoints\shops.py:284:    user.hashed_password = hash_password(new_password)
+  app\api\v1\endpoints\shops.py:285:    await db.flush()
+  app\api\v1\endpoints\shops.py:286:
+  app\api\v1\endpoints\shops.py:287:    await log_action(db, str(current_user.email), "RESET_SHOP_PASSWORD", shop_id,
+  app\api\v1\endpoints\shops.py:288:                     details=shop.name, role=current_user.role, ip_address=get_client_ip(request))
+  app\api\v1\endpoints\shops.py:289:    return APIResponse(message=f"Password reset for '{shop.name}'", data={"new_password": new_password})
+
+

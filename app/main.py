@@ -21,6 +21,8 @@ from app.middleware.security import (
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.system import router as system_router
 from app.api.v1.endpoints.features import router as features_router
+from app.api.v1.endpoints.appearance import router as appearance_router
+from app.api.v1.endpoints.tracking import router as tracking_router
 from app.api.v1.endpoints.shops import router as shops_router
 from app.api.v1.endpoints.files import router as files_router
 from app.api.v1.endpoints.orders import router as orders_router
@@ -28,6 +30,7 @@ from app.api.v1.endpoints.payments import router as payments_router
 from app.api.v1.endpoints.audit import router as audit_router
 from app.api.v1.endpoints.admin import router as admin_router
 from app.api.v1.endpoints.projects import router as projects_router
+from app.api.v1.endpoints.showcase import router as showcase_router
 from app.api.v1.endpoints.project_approval import router as project_approval_router
 from app.api.v1.endpoints.stock import router as stock_router
 from app.api.v1.endpoints.tickets import router as tickets_router
@@ -180,9 +183,12 @@ API_PREFIX = "/api/v1"
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(system_router, prefix=API_PREFIX)
 app.include_router(features_router, prefix=API_PREFIX)
+app.include_router(appearance_router, prefix=API_PREFIX)
+app.include_router(tracking_router, prefix=API_PREFIX)
 app.include_router(shops_router, prefix=API_PREFIX)
 app.include_router(files_router, prefix=API_PREFIX)
 app.include_router(projects_router, prefix=API_PREFIX)
+app.include_router(showcase_router, prefix=API_PREFIX)
 app.include_router(project_approval_router, prefix=API_PREFIX)
 app.include_router(stock_router, prefix=API_PREFIX)
 app.include_router(tickets_router, prefix=API_PREFIX)
@@ -226,4 +232,9 @@ async def full_control_page():
 
 @app.get("/shop", response_class=_HTMLResponse, include_in_schema=False)
 async def shop_control_page():
-    return (_STATIC_DIR / "specific_control.html").read_text(encoding="utf-8")
+    html = (_STATIC_DIR / "specific_control.html").read_text(encoding="utf-8")
+    return _HTMLResponse(content=html, headers={
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    })

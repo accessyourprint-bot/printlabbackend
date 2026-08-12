@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -131,12 +131,19 @@ canvas{width:100%!important}
 .pd-filter-btn{padding:7px 18px;border:1.5px solid #1a223e;border-radius:8px;background:#fff;color:#1a223e;font-size:.85rem;font-weight:600;cursor:pointer;transition:.15s}
 .pd-filter-btn.active{background:#1a223e;color:#fff}
 .pd-filter-btn:hover{background:#1a223e;color:#fff}
+
+.switch{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ddd;border-radius:22px;transition:.2s}
+.switch .slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:#ff5722}
+.switch input:checked + .slider:before{transform:translateX(18px)}
 </style>
 </head>
 <body>
 <div id="lw"><div class="lw"><div class="lb">
 <h2>PrintLab Admin</h2>
-<p>Owner Access ╬ô├ç├╢ Command Center</p>
+<p>Owner Access +ï¿½+ï¿½+ï¿½ Command Center</p>
 <label class="fil">Admin ID</label>
 <input class="fi" type="text" id="em" placeholder="Enter Admin ID" value="admin">
 <label class="fil">Password</label>
@@ -184,7 +191,7 @@ canvas{width:100%!important}
 </div>
 <div class="sec-label">Operations</div>
 <div class="card-grid">
-<div class="card" onclick="openPage('delivery')"><div class="card-icon" style="background:#ff7043">&#128666;</div><h3>Delivery Person</h3><p>Manage delivery staff ╬ô├ç├╢ name, photo, Aadhar, PAN, vehicle.</p><div class="card-open">Open &rarr;</div></div>
+<div class="card" onclick="openPage('delivery')"><div class="card-icon" style="background:#ff7043">&#128666;</div><h3>Delivery Person</h3><p>Manage delivery staff +ï¿½+ï¿½+ï¿½ name, photo, Aadhar, PAN, vehicle.</p><div class="card-open">Open &rarr;</div></div>
 <div class="card" onclick="openPage('customer')"><div class="card-icon" style="background:#8e44ad">&#128100;</div><h3>Project</h3><p>View and approve customer print projects and orders.</p><div class="card-open">Open &rarr;</div></div>
 <div class="card" onclick="openPage('outlet')"><div class="card-icon" style="background:#16a085">&#127970;</div><h3>Outlet Account</h3><p>Zone-wise outlet map with own and franchise filters.</p><div class="card-open">Open &rarr;</div></div>
 </div>
@@ -316,7 +323,7 @@ canvas{width:100%!important}
 <button class="tab-btn" id="otPermWhite" onclick="setOtPerm('white')">&#128275; White (Own)</button>
 </div></div>
 <div class="fg"><label>Login ID</label><input id="otLoginId" placeholder="e.g. outlet001"></div>
-<div class="fg"><label>Password</label><input id="otPassword" type="password" placeholder="Set login password"></div>
+<div class="fg"><label>Password</label><div style="position:relative"><input id="otPassword" type="password" placeholder="Set login password" style="width:100%;padding-right:44px"><button type="button" onclick="const p=document.getElementById('otPassword');const s=document.getElementById('otPwEye');if(p.type==='password'){p.type='text';s.textContent='ðŸ™ˆ';}else{p.type='password';s.textContent='ðŸ‘';}" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px"><span id="otPwEye">ðŸ‘</span></button></div></div>
 <button class="btn-full" onclick="addOutlet()">+ Add Outlet</button>
 </div>
 <!-- OUTLETS LIST -->
@@ -336,7 +343,7 @@ canvas{width:100%!important}
 <div class="form-panel"><h3>&#128101; Add Sub-Admin</h3>
 <div class="fg"><label>User ID</label><input id="saId" placeholder="e.g. SA001"></div>
 <div class="fg"><label>Name</label><input id="saName" placeholder="Full name"></div>
-<div class="fg"><label>Password</label><input id="saPass" type="password" placeholder="Set password"></div>
+<div class="fg"><label>Password</label><div style="position:relative"><input id="saPass" type="password" placeholder="Set password" style="width:100%;padding-right:44px"><button type="button" onclick="const p=document.getElementById('saPass');const s=document.getElementById('saPwEye');if(p.type==='password'){p.type='text';s.textContent='ðŸ™ˆ';}else{p.type='password';s.textContent='ðŸ‘';}" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px"><span id="saPwEye">ðŸ‘</span></button></div></div>
 <div class="fg"><label>Role</label><input id="saRole" value="sub-admin"></div>
 <button class="btn-full" onclick="addSubAdmin()">+ Add Sub-Admin</button>
 </div>
@@ -350,12 +357,14 @@ canvas{width:100%!important}
 <div id="pg-ticket" class="hidden">
 <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 16px">
 <div class="tab-row" style="margin:0">
-<button class="tab-btn on" onclick="filterTickets('customer',this)">&#128100; Customer Complaint</button>
-<button class="tab-btn" onclick="filterTickets('outlet',this)">&#127970; Outlet Complaint</button>
+<button class="tab-btn on" onclick="filterTicketsByStatus('all',this)">All Tickets</button>
+<button class="tab-btn" onclick="filterTicketsByStatus('open',this)">&#128308; Open</button>
+<button class="tab-btn" onclick="filterTicketsByStatus('in_progress',this)">&#128993; Under Process</button>
+<button class="tab-btn" onclick="filterTicketsByStatus('closed',this)">&#128994; Closed</button>
 </div>
 <button class="btn-sm btn-orange" onclick="openRaiseTicket()">+ Raise Ticket</button>
 </div>
-<div class="panel"><div class="panel-hd" id="tkHd">Customer Complaints (<span id="tkCount">0</span>)</div><div id="tkList"><div class="loading">Loading...</div></div></div>
+<div class="panel"><div class="panel-hd" id="tkHd">All Tickets (<span id="tkCount">0</span>)</div><div id="tkList"><div class="loading">Loading...</div></div></div>
 </div>
 <div id="pg-stock" class="hidden">
 <div class="two-col" style="margin-top:20px">
@@ -365,14 +374,6 @@ canvas{width:100%!important}
 </div>
 <div id="pg-appcontrol" class="hidden">
 <div style="margin-top:20px">
-<div class="panel" style="margin-bottom:16px">
-<div class="panel-hd">&#9881; System Controls</div>
-<div style="padding:20px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="sysToggles"><div class="loading">Loading...</div></div></div>
-</div>
-<div class="panel" style="margin-bottom:16px">
-<div class="panel-hd">&#127981; Feature Flags</div>
-<div style="padding:20px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="featToggles"><div class="loading">Loading...</div></div></div>
-</div>
 <div class="appctrl-grid">
 <div class="form-panel"><h3>&#127912; App Appearance</h3>
 <div class="fg"><label>Primary Color</label><div class="color-row"><div class="color-swatch" id="acPrimSw" style="background:#ff5722"></div><input id="acPrim" value="#ff5722" oninput="updatePreview()"></div></div>
@@ -388,19 +389,48 @@ canvas{width:100%!important}
 <div class="fg"><label>Logo URL</label><input id="acLogo" placeholder="https://example.com/logo.png" oninput="updatePreview()"></div>
 <div class="fg"><label>Banner Text</label><input id="acBanner" value="PrintLab" oninput="updatePreview()"></div>
 <button class="btn-full" onclick="saveAppSettings()">&#128190; Save Appearance</button>
+<div style="margin-top:20px;padding-top:20px;border-top:1px solid #eee">
+  <h4 style="margin:0 0 4px">Global GST</h4>
+  <p style="color:#888;font-size:.8rem;margin:0 0 12px">This GST % applies automatically to every feature's price</p>
+  <div style="display:flex;gap:10px">
+    <input type="text" inputmode="decimal" id="globalGstInput" placeholder="0" style="flex:1;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.9rem">
+    <button class="btn-sm btn-orange" onclick="saveGlobalGst()" style="padding:0 20px">Save</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn-sm" id="pvBtnLogin" onclick="setPreviewView('login')" style="flex:1;background:#1a223e;color:#fff;border:none">Login</button>
+    <button class="btn-sm" id="pvBtnDash" onclick="setPreviewView('dashboard')" style="flex:1;background:#eee;color:#1a223e;border:none">Dashboard</button>
+  </div>
+</div>
 </div>
 <div><div class="form-panel"><h3>&#128248; Live Preview</h3>
-<div class="preview-box">
-<div class="preview-top"><div class="preview-top-logo"><div class="plogo" id="prevLogo" style="background:#ff5722">PL</div>PrintLab</div><span class="preview-admin">Admin</span></div>
-<div class="preview-banner" id="prevBanner" style="background:#ff5722">PrintLab</div>
-<div class="preview-cards">
-<div class="preview-card"><div class="picon" id="prevIc1" style="background:#ff5722"></div><span>Print Done</span></div>
-<div class="preview-card"><div class="picon" id="prevIc2" style="background:#ff5722"></div><span>Payments</span></div>
-<div class="preview-card"><div class="picon" id="prevIc3" style="background:#ff5722"></div><span>Delivery</span></div>
-</div>
-<p style="text-align:center;color:#aaa;font-size:.76rem;padding:8px 16px 14px">Preview updates as you type</p>
+<div class="preview-box" style="padding:0;overflow:hidden">
+<iframe id="livePreviewFrame" src="http://localhost:5173/?preview=1&view=login" style="width:100%;height:640px;border:none;display:block"></iframe>
+<p style="text-align:center;color:#aaa;font-size:.76rem;padding:8px 16px 14px">Live app - updates as you type</p>
 </div></div></div>
 </div>
+<div class="form-panel" style="margin-top:20px">
+<h3>&#128274; App Control</h3>
+<p style="color:#888;font-size:.82rem;margin:-6px 0 16px">Lock or unlock features across the entire PrintLab app</p>
+<div id="fcFeatureList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px"></div>
+</div>
+
+<div id="fpMo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;max-width:560px;width:94%;padding:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #eee">
+      <div><h3 id="fpTitle" style="margin:0">Feature Price</h3><p style="margin:4px 0 0;color:#888;font-size:.82rem">Set the price for this feature.</p></div>
+      <button onclick="document.getElementById('fpMo').style.display='none'" style="background:none;border:none;font-size:1.3rem;cursor:pointer">&#10005;</button>
+    </div>
+    <div style="padding:24px">
+      <div style="display:flex;gap:12px">
+        <div class="fg" style="flex:1;min-width:0"><label>Price (&#8377;)</label><input type="text" inputmode="decimal" id="fpPrice" placeholder="0.00" oninput="recalcFeatureTotal()" style="width:100%;padding:12px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.85rem;box-sizing:border-box"></div>
+        <div class="fg" style="flex:1;min-width:0"><label>GST (%)</label><input type="text" inputmode="decimal" id="fpGst" placeholder="0" oninput="recalcFeatureTotal()" style="width:100%;padding:12px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.85rem;box-sizing:border-box"></div>
+        <div class="fg" style="flex:1;min-width:0"><label>Total (&#8377;)</label><input type="text" id="fpTotal" readonly style="width:100%;padding:12px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.85rem;background:#f7f7f7;font-weight:700;box-sizing:border-box"></div>
+      </div>
+      <button class="btn-sm btn-orange" onclick="saveFeaturePrice()" style="width:100%;margin-top:16px;padding:12px">Save Price</button>
+    </div>
+  </div>
+</div>
+
 </div>
 </div>
 </div>
@@ -434,18 +464,90 @@ async function doLogin(){
   }catch(e){document.getElementById('lerr').textContent='Cannot connect';}
 }
 function doLogout(){localStorage.removeItem('pl_full');location.reload();}
+async function loadFeatureFlags(){
+  const flags=await api('/api/v1/features');
+  const list=document.getElementById('fcFeatureList');
+  if(!Array.isArray(flags)){list.innerHTML='<p style="color:#c00">Failed to load features</p>';return;}
+  list.innerHTML=flags.map(f=>
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid #ececf1;border-radius:10px;background:'+(f.enabled?'#fff':'#faf7f5')+'">'+
+    '<span style="font-size:.86rem;font-weight:600;color:'+(f.enabled?'#1a223e':'#aaa')+';cursor:pointer" onclick="openFeaturePrice(\''+f.feature_name+'\',\''+f.label.replace(/"/g,'')+'\')">'+f.label+'</span>'+
+    '<label class="switch"><input type="checkbox" '+(f.enabled?'checked':'')+' onchange="toggleFeatureFlag(\''+f.feature_name+'\', this.checked)"><span class="slider"></span></label>'+
+    '</div>'
+  ).join('');
+}
+let curFeaturePricing=null;
+async function openFeaturePrice(featureName,label){
+  document.getElementById('fpMo').style.display='flex';
+  document.getElementById('fpTitle').textContent=label+' - Price';
+  document.getElementById('fpPrice').value='';
+  document.getElementById('fpGst').value=localStorage.getItem('pl_global_gst')||'0';
+  document.getElementById('fpGst').readOnly=true;
+  document.getElementById('fpGst').style.background='#f7f7f7';
+  document.getElementById('fpTotal').value='';
+  curFeaturePricing=null;
+  try{
+    const list=await api('/api/v1/pricing');
+    const items=Array.isArray(list)?list:[];
+    const match=items.find(p=>p.print_type===featureName);
+    if(match){
+      curFeaturePricing={id:match.id,print_type:featureName};
+      document.getElementById('fpPrice').value=match.price_per_page;
+    }else{
+      curFeaturePricing={id:null,print_type:featureName};
+    }
+  }catch(e){}
+  recalcFeatureTotal();
+}
+function recalcFeatureTotal(){
+  const price=parseFloat(document.getElementById('fpPrice').value)||0;
+  const gst=parseFloat(document.getElementById('fpGst').value)||0;
+  const total=price+(price*gst/100);
+  document.getElementById('fpTotal').value=total.toFixed(2);
+}
+async function saveFeaturePrice(){
+  const price=parseFloat(document.getElementById('fpPrice').value);
+  const gst=parseFloat(document.getElementById('fpGst').value)||0;
+  if(isNaN(price)||price<0){alert('Enter a valid price');return;}
+  if(!curFeaturePricing){alert('No feature selected');return;}
+  try{
+    if(curFeaturePricing.id){
+      await fetch(API+'/api/v1/pricing/'+curFeaturePricing.id+'?price_per_page='+price+'&gst_percent='+gst,{method:'PATCH',headers:{'Authorization':'Bearer '+tok}});
+    }else{
+      await api('/api/v1/pricing','POST',{print_type:curFeaturePricing.print_type,price_per_page:price,gst_percent:gst,is_global:true});
+    }
+    document.getElementById('fpMo').style.display='none';
+    alert('Price saved');
+  }catch(e){alert('Failed to save price');}
+}
+async function toggleFeatureFlag(name, enabled){
+  const r=await api('/api/v1/features/toggle','POST',{feature_name:name, enabled:enabled, shop_id:null});
+  if(!r || !r.data){alert('Failed to update feature');}
+  loadFeatureFlags();
+}
+
 function initApp(){
   document.getElementById('lw').classList.add('hidden');
   document.getElementById('appWrap').classList.remove('hidden');
   loadDashSummary();
+  loadGlobalGst();
+}
+function loadGlobalGst(){
+  const v=localStorage.getItem('pl_global_gst')||'0';
+  const el=document.getElementById('globalGstInput');
+  if(el) el.value=v;
+}
+function saveGlobalGst(){
+  const v=parseFloat(document.getElementById('globalGstInput').value)||0;
+  localStorage.setItem('pl_global_gst', String(v));
+  alert('Global GST saved. It now applies to all feature prices.');
 }
 async function api(u,m,b){
   const o={method:m||'GET',headers:{Authorization:'Bearer '+tok}};
   if(b){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b);}
   try{const r=await fetch(API+u,o);return await r.json();}catch(e){return null;}
 }
-function fmtDate(d){try{return new Date(d).toLocaleDateString('en-GB');}catch(e){return'╬ô├ç├╢';}}
-function fmtTime(d){try{return new Date(d).toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:true});}catch(e){return'╬ô├ç├╢';}}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('en-GB');}catch(e){return'+ï¿½+ï¿½+ï¿½';}}
+function fmtTime(d){try{return new Date(d).toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:true});}catch(e){return'+ï¿½+ï¿½+ï¿½';}}
 const PAGE_TITLES={
   liveprint:'Live Print Update',printdone:'Print Done',paymentday:'Payment for Day',
   paymenthist:'Payment History',delivery:'Delivery Person',customer:'Project',
@@ -637,7 +739,7 @@ async function loadDelivery(){
   const d=await api('/api/v1/delivery-persons');
   const agents=Array.isArray(d)?d:(d?.data||[]);
   document.getElementById('dpCount').textContent=agents.length;
-  document.getElementById('dpList').innerHTML=agents.length?agents.map(a=>'<div class="dp-card"><div><div class="dp-name">'+a.name+'</div><div class="dp-meta">Age: '+(a.age||'╬ô├ç├╢')+' &bull; +91 '+(a.phone||'╬ô├ç├╢')+'</div><div class="dp-docs">Aadhar: '+(a.aadhar||'╬ô├ç├╢')+' &bull; PAN: '+(a.pan||'╬ô├ç├╢')+'</div><span class="badge b-blue" style="margin-top:6px;display:inline-block">'+(a.vehicle_number||'╬ô├ç├╢')+'</span></div><button class="icon-del" onclick="delAgent(\''+a.id+'\')">&#128465;</button></div>').join(''):'<div class="empty">No delivery persons yet</div>';
+  document.getElementById('dpList').innerHTML=agents.length?agents.map(a=>'<div class="dp-card"><div><div class="dp-name">'+a.name+'</div><div class="dp-meta">Age: '+(a.age||'+ï¿½+ï¿½+ï¿½')+' &bull; +91 '+(a.phone||'+ï¿½+ï¿½+ï¿½')+'</div><div class="dp-docs">Aadhar: '+(a.aadhar||'+ï¿½+ï¿½+ï¿½')+' &bull; PAN: '+(a.pan||'+ï¿½+ï¿½+ï¿½')+'</div><span class="badge b-blue" style="margin-top:6px;display:inline-block">'+(a.vehicle_number||'+ï¿½+ï¿½+ï¿½')+'</span></div><button class="icon-del" onclick="delAgent(\''+a.id+'\')">&#128465;</button></div>').join(''):'<div class="empty">No delivery persons yet</div>';
 }
 async function addDelivery(){
   const name=document.getElementById('dpName').value,phone=document.getElementById('dpPhone').value;
@@ -707,13 +809,64 @@ async function loadCustomers(){
 }
 async function approveProject(id){await api('/api/v1/orders/'+id,'PUT',{status:'printed'});loadCustomers();}
 async function rejectProject(id){await api('/api/v1/orders/'+id,'PUT',{status:'cancelled'});loadCustomers();}
-let allOutlets=[];
+
 let curOtPerm='blue';
 function setOtPerm(type){
   curOtPerm=type;
   document.getElementById('otPermBlue').classList.toggle('on',type==='blue');
   document.getElementById('otPermWhite').classList.toggle('on',type==='white');
 }
+function openResetPwModal(id){
+  const overlay=document.createElement('div');
+  overlay.id='rpwOverlay';
+  overlay.dataset.shopId=id;
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  const _o = (typeof allOutlets!=='undefined' ? allOutlets.find(x=>x.id===id) : null);
+  const _label = _o ? (_o.name||'Outlet')+' &bull; Login ID: '+(_o.owner_email||id) : ('Outlet ID: '+id);
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:12px;padding:24px;width:340px;max-width:90vw">'+
+      '<h3 style="margin:0 0 4px">Reset Outlet Password</h3>'+
+      '<p style="margin:0 0 16px;color:#888;font-size:.78rem">'+_label+'</p>'+
+      '<div class="fg"><label>New Password</label><div style="position:relative">'+
+        '<input id="rpwNew" type="password" placeholder="Enter new password" style="width:100%;padding-right:44px">'+
+        '<button type="button" onclick="togglePw(\'rpwNew\',\'rpwEye1\')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px">'+
+          '<span id="rpwEye1">\ud83d\udc41</span></button></div></div>'+
+      '<div class="fg" style="margin-top:12px"><label>Re-enter Password</label><div style="position:relative">'+
+        '<input id="rpwConfirm" type="password" placeholder="Re-enter password" style="width:100%;padding-right:44px">'+
+        '<button type="button" onclick="togglePw(\'rpwConfirm\',\'rpwEye2\')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px">'+
+          '<span id="rpwEye2">\ud83d\udc41</span></button></div></div>'+
+      '<p id="rpwErr" style="color:#c00;font-size:.8rem;margin:10px 0 0;display:none"></p>'+
+      '<div style="display:flex;gap:8px;margin-top:18px">'+
+        '<button onclick="document.getElementById(\'rpwOverlay\').remove()" style="flex:1;padding:10px;background:#eee;border:none;border-radius:8px;cursor:pointer">Cancel</button>'+
+        '<button onclick="submitResetPw()" style="flex:1;padding:10px;background:#1a223e;color:#fff;border:none;border-radius:8px;cursor:pointer">Reset</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function togglePw(inputId,eyeId){
+  const p=document.getElementById(inputId);
+  const s=document.getElementById(eyeId);
+  if(p.type==='password'){p.type='text';s.textContent='\ud83d\ude48';}else{p.type='password';s.textContent='\ud83d\udc41';}
+}
+async function submitResetPw(){
+  const overlay=document.getElementById('rpwOverlay');
+  const id=overlay.dataset.shopId;
+  const pw=document.getElementById('rpwNew').value;
+  const pw2=document.getElementById('rpwConfirm').value;
+  const err=document.getElementById('rpwErr');
+  if(!pw||pw.length<6){err.textContent='Password must be at least 6 characters';err.style.display='block';return;}
+  if(pw!==pw2){err.textContent='Passwords do not match';err.style.display='block';return;}
+  try{
+    const r=await api('/api/v1/shops/'+id+'/reset-password','PATCH',{new_password:pw});
+    if(r && r.data && r.data.new_password){
+      overlay.remove();
+      alert('Password reset successfully.');
+    }else{
+      err.textContent='Password reset, but no confirmation was returned.';err.style.display='block';
+    }
+  }catch(e){err.textContent='Failed to reset password';err.style.display='block';}
+}
+function resetOutletPassword(id){ openResetPwModal(id); }
 async function loadOutlets(){
   const d=await api('/api/v1/shops');
   allOutlets=Array.isArray(d)?d:(d?.data||[]);
@@ -737,9 +890,10 @@ function filterOutlets(type,el){
       '<div style="font-size:.8rem;color:#999;margin-top:2px">'+(o.city||'')+(o.state?', '+o.state:'')+'</div></div>'+
       '<div style="display:flex;gap:6px">'+permBadge+statusBadge+'</div></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem;margin-bottom:10px">'+
-      '<div><span style="color:#999;font-weight:600">Owner:</span> '+(o.owner_name||'—')+'</div>'+
-      '<div><span style="color:#999;font-weight:600">Phone:</span> '+(o.owner_phone||'—')+'</div>'+
-      '<div><span style="color:#999;font-weight:600">Pincode:</span> '+(o.pincode||'—')+'</div>'+
+      '<div><span style="color:#999;font-weight:600">Login ID:</span> '+(o.owner_email?o.owner_email.split('@')[0]:'ï¿½')+'</div>'+
+      '<div><span style="color:#999;font-weight:600">Owner:</span> '+(o.owner_name||'ï¿½')+'</div>'+
+      '<div><span style="color:#999;font-weight:600">Phone:</span> '+(o.owner_phone||'ï¿½')+'</div>'+
+      '<div><span style="color:#999;font-weight:600">Pincode:</span> '+(o.pincode||'ï¿½')+'</div>'+
       '<div><span style="color:#999;font-weight:600">Radius:</span> '+(o.delivery_radius_km||5)+' km</div>'+
       (hasZone?'<div><span style="color:#999;font-weight:600">Lat:</span> '+o.latitude+'</div>'+
       '<div><span style="color:#999;font-weight:600">Lng:</span> '+o.longitude+'</div>':
@@ -748,6 +902,7 @@ function filterOutlets(type,el){
       '<div style="display:flex;justify-content:space-between;align-items:center">'+
       '<div style="font-size:.78rem;color:#999">'+(o.address||'No address')+'</div>'+
       '<div style="display:flex;gap:6px">'+
+      '<button id="rst_'+o.id+'" onclick="resetOutletPassword(this.id.slice(4))" style="padding:5px 12px;background:#1a223e;color:#fff;border:none;border-radius:6px;font-size:.78rem;cursor:pointer">Reset Password</button>'+
       '<button id="tog_'+o.id+'" onclick="toggleOutlet(this.id.slice(4))" style="padding:5px 12px;background:'+(o.is_active?'#e74c3c':'#22b573')+';color:#fff;border:none;border-radius:6px;font-size:.78rem;cursor:pointer">'+(o.is_active?'Deactivate':'Activate')+'</button>'+
       '<button id="del_'+o.id+'" onclick="delOutlet(this.id.slice(4))" style="padding:5px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:.78rem;cursor:pointer">Delete</button>'+
       '</div></div></div>';
@@ -759,16 +914,15 @@ async function addOutlet(){
   const loginId=document.getElementById('otLoginId').value;
   const password=document.getElementById('otPassword').value;
   if(!name||!owner) return alert('Outlet name and owner required');
-  if(loginId&&password){
-    await api('/api/v1/auth/register','POST',{email:loginId+'@altprint.in',password:password,full_name:owner,role:'shop'});
-  }
+  const loginEmail=loginId?loginId+'@altprint.in':null;
+  if(loginId&&password&&password.length<6) return alert('Password must be at least 6 characters');
   const lat=document.getElementById('otLat').value;
   const lng=document.getElementById('otLng').value;
-  await api('/api/v1/shops','POST',{
+  const shopResp=await api('/api/v1/shops','POST',{
     name:name,
     owner_name:owner,
     owner_phone:document.getElementById('otPhone').value,
-    owner_email:document.getElementById('otEmail').value||loginId+'@altprint.in',
+    owner_email:document.getElementById('otEmail').value||loginEmail||('outlet'+Date.now()+'@altprint.in'),
     city:document.getElementById('otCity').value,
     state:document.getElementById('otState').value,
     pincode:document.getElementById('otPin').value,
@@ -779,6 +933,17 @@ async function addOutlet(){
     permission_type:curOtPerm,
     is_active:true
   });
+  const newShopId=shopResp&&shopResp.data&&shopResp.data.id;
+  if(!newShopId){
+    alert('Failed to create outlet: '+(shopResp&&shopResp.detail?shopResp.detail:'unknown error'));
+    return;
+  }
+  if(loginId&&password){
+    const loginResp=await api('/api/v1/admin/create-shop-login','POST',{email:loginEmail,password:password,full_name:owner,shop_id:newShopId});
+    if(!loginResp||loginResp.detail||loginResp.success===false){
+      alert('Outlet was created, but the login account could not be set up: '+(loginResp&&loginResp.detail?loginResp.detail:'unknown error')+'\n\nYou can add a login later using Reset Password once a login exists, or contact support.');
+    }
+  }
   ['otName','otOwner','otPhone','otEmail','otCity','otState','otPin','otAddr','otLat','otLng','otLoginId','otPassword'].forEach(id=>document.getElementById(id).value='');
   loadOutlets();
   alert('Outlet added!');
@@ -792,7 +957,7 @@ async function loadSubAdmins(){
   document.getElementById('saCount').textContent=allSubAdmins.length;
   document.getElementById('saTable').innerHTML=allSubAdmins.length?
     '<table><tr><th>User ID</th><th>Name</th><th>Role</th><th>Created</th><th></th></tr>'+
-    allSubAdmins.map((u,i)=>'<tr><td class="uid">SA'+String(i+1).padStart(3,'0')+'</td><td>'+(u.full_name||u.name||'╬ô├ç├╢')+'</td><td><span class="badge b-dark">'+(u.role||'sub-admin')+'</span></td><td>'+fmtDate(u.created_at)+'</td><td><button class="icon-del" onclick="delSubAdmin(\''+u.id+'\')">&#128465;</button></td></tr>').join('')+'</table>':
+    allSubAdmins.map((u,i)=>'<tr><td class="uid">SA'+String(i+1).padStart(3,'0')+'</td><td>'+(u.full_name||u.name||'+ï¿½+ï¿½+ï¿½')+'</td><td><span class="badge b-dark">'+(u.role||'sub-admin')+'</span></td><td>'+fmtDate(u.created_at)+'</td><td><button class="icon-del" onclick="delSubAdmin(\''+u.id+'\')">&#128465;</button></td></tr>').join('')+'</table>':
     '<div class="empty">No sub-admins yet</div>';
 }
 async function addSubAdmin(){
@@ -805,26 +970,71 @@ async function addSubAdmin(){
 async function delSubAdmin(id){if(confirm('Remove this sub-admin?')){await api('/api/v1/admin/users/'+id,'DELETE');loadSubAdmins();}}
 async function loadAccountMgmt(){
   const d=await api('/api/v1/admin/users');
-  const users=(Array.isArray(d)?d:(d?.data||[])).filter(u=>u.role==='customer'||!u.role);
+  const users=(Array.isArray(d)?d:(d?.data||[])).filter(u=>u.role==='user'||u.role==='customer');
   document.getElementById('amCount').textContent=users.length;
   document.getElementById('amTable').innerHTML=users.length?
     '<table><tr><th>User ID</th><th>Name</th><th>Phone</th><th>Status</th><th>Action</th></tr>'+
-    users.map((u,i)=>{const active=u.is_active!==false;return'<tr><td class="uid">CUS'+String(i+1).padStart(3,'0')+'</td><td>'+(u.full_name||u.name||'Customer')+'</td><td>+91 '+(u.phone||'╬ô├ç├╢')+'</td><td><span class="badge '+(active?'b-green':'b-red')+'">'+(active?'active':'suspended')+'</span></td><td><button class="btn-sm '+(active?'btn-red':'btn-orange')+'" onclick="toggleUserStatus(\'+u.id+\','+(!active)+')">'+(active?'&#128683; Suspend':'&#128275; Activate')+'</button></td></tr>';}).join('')+'</table>':
+    users.map((u,i)=>{const active=u.is_active!==false;return'<tr><td class="uid">CUS'+String(i+1).padStart(3,'0')+'</td><td>'+(u.full_name||u.name||'Customer')+'</td><td>+91 '+(u.phone||'+ï¿½+ï¿½+ï¿½')+'</td><td><span class="badge '+(active?'b-green':'b-red')+'">'+(active?'active':'suspended')+'</span></td><td><button class="btn-sm '+(active?'btn-red':'btn-orange')+'" onclick="toggleUserStatus(\'+u.id+\','+(!active)+')">'+(active?'&#128683; Suspend':'&#128275; Activate')+'</button></td></tr>';}).join('')+'</table>':
     '<div class="empty">No customer accounts</div>';
 }
 async function toggleUserStatus(id,active){await api('/api/v1/admin/users/'+id+'/status?is_active='+active,'PATCH');loadAccountMgmt();}
+let ticketStatusFilter='all';
 async function loadTickets(){
   const d=await api('/api/v1/tickets');
   allTickets=Array.isArray(d)?d:(d?.data||[]);
-  filterTickets('customer',document.querySelector('#pg-ticket .tab-btn.on'));
+  renderAllTickets();
 }
-function filterTickets(type,el){
+function filterTicketsByStatus(status,el){
+  ticketStatusFilter=status;
   document.querySelectorAll('#pg-ticket .tab-row .tab-btn').forEach(t=>t.classList.remove('on'));
   if(el) el.classList.add('on');
-  const list=allTickets.filter(t=>type==='customer'?(t.category==='customer'||!t.category):(t.category==='outlet'||t.category==='stock'||t.category==='technical'));
-  document.getElementById('tkHd').innerHTML=(type==='customer'?'Customer':'Outlet')+' Complaints (<span id="tkCount">'+list.length+'</span>)';
-  document.getElementById('tkList').innerHTML=list.length?list.map(t=>'<div class="ticket-item"><div><div class="ticket-title"><b>'+(t.subject||'Issue')+'</b><span class="badge '+(t.status==='resolved'?'b-green':'b-yellow')+'">'+(t.status||'open')+'</span></div><div class="ticket-meta">User: <span class="uid;">'+((t.raised_by||t.user_id||'').toString().slice(0,8)||'╬ô├ç├╢')+'</span> &bull; '+fmtDate(t.created_at)+', '+fmtTime(t.created_at)+'</div><div class="ticket-desc">'+(t.description||'No details provided.')+'</div></div><button class="btn-sm" onclick="resolveTicket(\''+t.id+'\')">&#10003; Resolve</button></div>').join(''):'<div class="empty">No complaints</div>';
+  renderAllTickets();
 }
+function ticketBadgeClass(s){
+  if(s==='closed'||s==='resolved')return 'b-green';
+  if(s==='in_progress')return 'b-yellow';
+  return 'b-red';
+}
+function ticketBadgeLabel(s){
+  if(s==='closed'||s==='resolved')return 'Closed';
+  if(s==='in_progress')return 'Under Process';
+  return 'Open';
+}
+function ticketNextAction(t){
+  const s=t.status||'open';
+  if(s==='open'||s==='in_progress'===false&&s!=='in_progress'&&s!=='closed'&&s!=='resolved'){}
+  if(s==='closed'||s==='resolved')return '';
+  if(s==='in_progress')return '<button class="btn-sm" onclick="event.stopPropagation();updateTicketStatus(\''+t.id+'\',\'closed\')">&#10003; Close Ticket</button>';
+  return '<button class="btn-sm" onclick="event.stopPropagation();updateTicketStatus(\''+t.id+'\',\'in_progress\')">&#8594; Move to Under Process</button>';
+}
+function renderAllTickets(){
+  const list = ticketStatusFilter==='all' ? allTickets : allTickets.filter(t=>{
+    const s=t.status||'open';
+    if(ticketStatusFilter==='closed') return s==='closed'||s==='resolved';
+    return s===ticketStatusFilter;
+  });
+  const label = ticketStatusFilter==='all'?'All Tickets':(ticketStatusFilter==='open'?'Open Tickets':(ticketStatusFilter==='in_progress'?'Under Process':'Closed Tickets'));
+  document.getElementById('tkHd').innerHTML=label+' (<span id="tkCount">'+list.length+'</span>)';
+  document.getElementById('tkList').innerHTML=list.length?list.map(t=>'<div class="ticket-item" style="cursor:pointer" onclick="showTicketDetail(\''+t.id+'\')"><div><div class="ticket-title"><b>'+(t.subject||'Issue')+'</b><span class="badge '+ticketBadgeClass(t.status)+'">'+ticketBadgeLabel(t.status)+'</span></div><div class="ticket-meta">Raised by: <b>'+(t.raised_by||'Anonymous')+'</b> &bull; '+fmtDate(t.created_at)+', '+fmtTime(t.created_at)+'</div><div class="ticket-desc">'+(t.description||'No details provided.')+'</div></div>'+ticketNextAction(t)+'</div>').join(''):'<div class="empty">No tickets in this category</div>';
+}
+async function updateTicketStatus(id,status){
+  await api('/api/v1/tickets/'+id,'PATCH',{status:status});
+  loadTickets();
+}
+function showTicketDetail(id){
+  const t=allTickets.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById('tdName').textContent=t.raised_by||'Not provided';
+  document.getElementById('tdSubject').textContent=t.subject||'Issue';
+  document.getElementById('tdDesc').textContent=t.description||'No details provided.';
+  document.getElementById('tdStatus').textContent=t.status||'open';
+  document.getElementById('tdStatus').className='badge '+(t.status==='resolved'?'b-green':'b-yellow');
+  const rb=document.getElementById('tdResolveBtn');
+  rb.style.display=t.status==='resolved'?'none':'inline-block';
+  rb.onclick=function(){resolveTicket(t.id);document.getElementById('ticketDetailModal').style.display='none';};
+  document.getElementById('ticketDetailModal').style.display='flex';
+}
+
 async function resolveTicket(id){await api('/api/v1/tickets/'+id,'PATCH',{status:'resolved'});loadTickets();}
 async function loadStock(){
   const d=await api('/api/v1/stock');
@@ -837,9 +1047,9 @@ async function loadStock(){
   const td=await api('/api/v1/tickets');
   const tickets=(Array.isArray(td)?td:(td?.data||[])).filter(t=>t.status==='open'||!t.status);
   document.getElementById('skTkCount').textContent=tickets.length;
-  document.getElementById('skTickets').innerHTML=tickets.length?tickets.map(t=>'<div style="border:1px solid #f0f0f3;border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span class="badge b-yellow">'+(t.status||'open')+'</span><span style="font-size:.76rem;color:#aaa">'+(t.category==='customer'?'Customer':'Outlet')+'</span></div><div style="font-weight:700;font-size:.88rem;margin-top:6px">'+(t.subject||'Issue')+'</div><div style="font-size:.78rem;color:#aaa">'+((t.raised_by||'').toString().slice(0,8)||'╬ô├ç├╢')+'</div></div>').join(''):'<div class="empty">No open tickets</div>';
+  document.getElementById('skTickets').innerHTML=tickets.length?tickets.map(t=>'<div style="border:1px solid #f0f0f3;border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span class="badge b-yellow">'+(t.status||'open')+'</span><span style="font-size:.76rem;color:#aaa">'+(t.category==='customer'?'Customer':'Outlet')+'</span></div><div style="font-weight:700;font-size:.88rem;margin-top:6px">'+(t.subject||'Issue')+'</div><div style="font-size:.78rem;color:#aaa">'+((t.raised_by||'').toString().slice(0,8)||'+ï¿½+ï¿½+ï¿½')+'</div></div>').join(''):'<div class="empty">No open tickets</div>';
 }
-function loadAppControl(){updatePreview();}
+
 function setFont(font,el){
   document.querySelectorAll('#acFonts .font-btn').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
@@ -853,11 +1063,7 @@ function updatePreview(){
   document.getElementById('prevLogo').style.background=prim;
   ['prevIc1','prevIc2','prevIc3'].forEach(id=>document.getElementById(id).style.background=prim);
 }
-async function saveAppSettings(){
-  const settings={primary_color:document.getElementById('acPrim').value,secondary_color:document.getElementById('acSec').value,logo_url:document.getElementById('acLogo').value,banner_text:document.getElementById('acBanner').value};
-  try{await api('/api/v1/admin/app-settings','POST',settings);alert('App settings saved!');}
-  catch(e){alert('Saved locally - connect /api/v1/admin/app-settings endpoint');}
-}
+
 
 function openRaiseTicket(){document.getElementById('raiseTicketModal').style.display='flex';}
 async function submitRaiseTicket(){
@@ -868,7 +1074,19 @@ async function submitRaiseTicket(){
   else alert('Error raising ticket');
 }
 
-function loadAppControl(){updatePreview();loadSysToggles();loadFeatToggles();}
+function loadAppControl(){loadSavedAppearance();loadFeatureFlags();}
+async function loadSavedAppearance(){
+  const a=await api('/api/v1/appearance');
+  if(!a||a.detail)return;
+  document.getElementById('acPrim').value=a.primary_color;
+  document.getElementById('acPrimSw').style.background=a.primary_color;
+  document.getElementById('acSec').value=a.secondary_color;
+  document.getElementById('acSecSw').style.background=a.secondary_color;
+  document.getElementById('acLogo').value=a.logo_url||'';
+  document.getElementById('acBanner').value=a.banner_text;
+  document.querySelectorAll('#acFonts .font-btn').forEach(b=>b.classList.toggle('on', b.textContent===a.font_family));
+  updatePreview();
+}
 async function loadSysToggles(){
   const d=await api('/api/v1/system/config');
   if(!d){document.getElementById('sysToggles').innerHTML='<div class="empty">Error</div>';return;}
@@ -894,7 +1112,7 @@ async function loadSysToggles(){
       '<div style="font-size:.75rem;margin-top:3px;color:'+(enabled?'#22b573':'#e74c3c')+';font-weight:600">'+(enabled?'ENABLED':'DISABLED')+'</div>'+
       '</div>'+
       '<label style="position:relative;width:46px;height:24px;flex-shrink:0;cursor:pointer">'+
-      '<input type="checkbox" '+(enabled?'checked':'')+' onchange="toggleSys(''+f.key+'',this.checked)" style="opacity:0;width:0;height:0">'+
+      '<input type="checkbox" '+(enabled?'checked':'')+' onchange="toggleSys(\'+f.key+\',this.checked)" style="opacity:0;width:0;height:0">'+
       '<span style="position:absolute;cursor:pointer;inset:0;background:'+(enabled?f.color:'#ccc')+';border-radius:24px;transition:.2s;display:block">'+
       '<span style="position:absolute;width:18px;height:18px;left:'+(enabled?'25px':'3px')+';bottom:3px;background:#fff;border-radius:50%;transition:.2s;display:block"></span>'+
       '</span></label></div>';
@@ -916,7 +1134,7 @@ async function loadFeatToggles(){
       '<div style="font-size:.75rem;margin-top:3px;color:'+(f.enabled?'#22b573':'#e74c3c')+';font-weight:600">'+(f.enabled?'ON':'OFF')+'</div>'+
       '</div>'+
       '<label style="position:relative;width:46px;height:24px;flex-shrink:0;cursor:pointer">'+
-      '<input type="checkbox" '+(f.enabled?'checked':'')+' onchange="toggleFeat(''+f.feature_name+'',this.checked)" style="opacity:0;width:0;height:0">'+
+      '<input type="checkbox" '+(f.enabled?'checked':'')+' onchange="toggleFeat(\'+f.feature_name+\',this.checked)" style="opacity:0;width:0;height:0">'+
       '<span style="position:absolute;cursor:pointer;inset:0;background:'+(f.enabled?'#22b573':'#ccc')+';border-radius:24px;transition:.2s;display:block">'+
       '<span style="position:absolute;width:18px;height:18px;left:'+(f.enabled?'25px':'3px')+';bottom:3px;background:#fff;border-radius:50%;transition:.2s;display:block"></span>'+
       '</span></label></div>';
@@ -925,6 +1143,45 @@ async function loadFeatToggles(){
 }
 
 async function toggleFeat(name,val){await api('/api/v1/features/toggle','POST',{feature_name:name,enabled:val,scope:'global'});loadFeatToggles();}
+async function loadOutletShops(){
+  const shops = await api('/api/v1/shops');
+  const sel = document.getElementById('outletSel');
+  if(!Array.isArray(shops) || !shops.length){ sel.innerHTML='<option value="">No outlets found</option>'; return; }
+  sel.innerHTML = shops.map(function(s){return '<option value="'+s.id+'">'+s.name+'</option>';}).join('');
+  loadOutletFeats();
+}
+async function loadOutletFeats(){
+  const shopId = document.getElementById('outletSel').value;
+  const box = document.getElementById('outletFeats');
+  if(!shopId){ box.innerHTML=''; return; }
+  box.innerHTML = '<div class="loading">Loading...</div>';
+  const d = await api('/api/v1/features?shop_id='+shopId);
+  if(!Array.isArray(d)){ box.innerHTML='<div class="empty">Error</div>'; return; }
+  const wanted = ['black_white_print','color_print'];
+  const filtered = d.filter(function(f){return wanted.indexOf(f.feature_name)!==-1;});
+  var html='';
+  for(var i=0;i<filtered.length;i++){
+    var f=filtered[i];
+    html+='<div style="background:#fff;border:1.5px solid #ebebee;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center">'+
+      '<div>'+
+      '<div style="font-weight:700;font-size:.88rem">'+f.label+'</div>'+
+      '<div style="font-size:.75rem;color:#999;margin-top:2px">'+f.feature_name+'</div>'+
+      '<div style="font-size:.75rem;margin-top:3px;color:'+(f.enabled?'#22b573':'#e74c3c')+';font-weight:600">'+(f.enabled?'ON':'OFF')+'</div>'+
+      '</div>'+
+      '<label style="position:relative;width:46px;height:24px;flex-shrink:0;cursor:pointer">'+
+      '<input type="checkbox" '+(f.enabled?'checked':'')+' onchange="toggleOutletFeat(&quot;'+f.feature_name+'&quot;,this.checked)" style="opacity:0;width:0;height:0">'+
+      '<span style="position:absolute;cursor:pointer;inset:0;background:'+(f.enabled?'#22b573':'#ccc')+';border-radius:24px;transition:.2s;display:block">'+
+      '<span style="position:absolute;width:18px;height:18px;left:'+(f.enabled?'25px':'3px')+';bottom:3px;background:#fff;border-radius:50%;transition:.2s;display:block"></span>'+
+      '</span></label></div>';
+  }
+  box.innerHTML = html || '<div class="empty">No matching flags for this outlet</div>';
+}
+async function toggleOutletFeat(name,val){
+  const shopId = document.getElementById('outletSel').value;
+  await api('/api/v1/features/toggle','POST',{feature_name:name,enabled:val,shop_id:shopId});
+  loadOutletFeats();
+}
+
 function setFont(font,el){document.querySelectorAll('#acFonts .font-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
 function updatePreview(){
   const prim=document.getElementById('acPrim').value||'#ff5722';
@@ -938,8 +1195,8 @@ function updatePreview(){
 async function saveAppSettings(){
   const font=document.querySelector('#acFonts .font-btn.on')?.textContent||'Inter';
   const s={primary_color:document.getElementById('acPrim').value,secondary_color:document.getElementById('acSec').value,font_family:font,logo_url:document.getElementById('acLogo').value,banner_text:document.getElementById('acBanner').value};
-  const r=await api('/api/v1/system/config','PUT',s);
-  if(r)alert('Appearance saved!');else alert('Error saving');
+  const r=await api('/api/v1/appearance','PUT',s);
+  if(r&&r.data)alert('Appearance saved!');else alert('Error saving - check console');
 }
 
 let pdFilterMode='daily';
@@ -993,6 +1250,13 @@ function buildPdChart_old(labels,data){
   const ctx=document.getElementById('pdChart').getContext('2d');
   pdChartObj=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Payment (Rs)',data:data,backgroundColor:'rgba(26,34,62,0.7)',borderColor:'#1a223e',borderWidth:1,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:5000,ticks:{callback:v=>'Rs'+v},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}}});
 }
+function setPreviewView(view){
+  document.getElementById('livePreviewFrame').src='http://localhost:5173/?preview=1&view='+view;
+  document.getElementById('pvBtnLogin').style.background=view==='login'?'#1a223e':'#eee';
+  document.getElementById('pvBtnLogin').style.color=view==='login'?'#fff':'#1a223e';
+  document.getElementById('pvBtnDash').style.background=view==='dashboard'?'#1a223e':'#eee';
+  document.getElementById('pvBtnDash').style.color=view==='dashboard'?'#fff':'#1a223e';
+}
 </script>
 
 <div id="raiseTicketModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center">
@@ -1006,6 +1270,21 @@ function buildPdChart_old(labels,data){
 <div class="fg"><label>Subject</label><input id="rtSubject" placeholder="Brief description"></div>
 <div class="fg"><label>Description</label><textarea id="rtDesc" rows="3" placeholder="More details..." style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.9rem;font-family:inherit"></textarea></div>
 <button class="btn-full" onclick="submitRaiseTicket()">Raise Ticket</button>
+</div>
+</div></div>
+
+<div id="ticketDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center">
+<div style="background:#fff;border-radius:14px;width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+<div style="padding:20px 24px;border-bottom:1px solid #f0f0f3;display:flex;justify-content:space-between;align-items:center">
+<b style="font-size:1rem">Ticket Details</b>
+<button onclick="document.getElementById(\'ticketDetailModal\').style.display=\'none\'" style="background:none;border:none;font-size:1.3rem;cursor:pointer">&#10005;</button>
+</div>
+<div style="padding:24px">
+<div class="fg"><label>Raised By</label><div id="tdName" style="padding:10px 0;font-weight:600"></div></div>
+<div class="fg"><label>Subject</label><div id="tdSubject" style="padding:10px 0;font-weight:600"></div></div>
+<div class="fg"><label>Status</label><div style="padding:6px 0"><span id="tdStatus" class="badge b-yellow"></span></div></div>
+<div class="fg"><label>Description</label><div id="tdDesc" style="padding:10px 0;white-space:pre-wrap"></div></div>
+<button id="tdResolveBtn" class="btn-full">&#10003; Resolve Ticket</button>
 </div>
 </div></div>
 

@@ -35,6 +35,13 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=8)
     full_name: Optional[str] = None
 
+
+class CreateShopLoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    full_name: Optional[str] = None
+    shop_id: str
+
     @model_validator(mode="after")
     def at_least_one_contact(self):
         if not self.email and not self.phone:
@@ -60,6 +67,7 @@ class TokenResponse(BaseModel):
     expires_in: int
     role: str
     user_id: str
+    shop_id: Optional[str] = None
 
 
 class RefreshRequest(BaseModel):
@@ -127,9 +135,30 @@ class FeatureFlagOut(BaseModel):
     scope: str
     shop_id: Optional[str]
     updated_at: Optional[datetime]
+    special_instructions: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class AppAppearanceOut(BaseModel):
+    primary_color: str
+    secondary_color: str
+    font_family: str
+    logo_url: Optional[str]
+    banner_text: str
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+class UpdateAppAppearanceRequest(BaseModel):
+    primary_color: Optional[str] = None
+    secondary_color: Optional[str] = None
+    font_family: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_text: Optional[str] = None
 
 
 class ToggleFeatureRequest(BaseModel):
@@ -310,6 +339,8 @@ class OrderOut(BaseModel):
     shop_id: str
     status: str
     delivery_type: str
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
     printing_cost: float
     color_cost: float
     binding_cost: float
@@ -318,6 +349,7 @@ class OrderOut(BaseModel):
     gst_amount: float
     grand_total: float
     files: List[OrderFileOut] = []
+    is_downloaded: bool = False
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -416,6 +448,8 @@ class TicketCreate(BaseModel):
     subject: str = Field(..., min_length=3, max_length=255)
     description: str = Field(..., min_length=3, max_length=2000)
     priority: str = Field("normal", pattern="^(low|normal|high|urgent)$")
+    image_url: Optional[str] = None
+    raised_by: Optional[str] = None
 
 
 class TicketUpdate(BaseModel):
@@ -432,6 +466,8 @@ class TicketOut(BaseModel):
     status: str
     priority: str
     admin_response: Optional[str] = None
+    raised_by: Optional[str] = None
+    image_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -465,6 +501,10 @@ class DeliveryPersonOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class DeliveryPersonWithCountOut(DeliveryPersonOut):
+    order_count: int = 0
 
 
 class PricingCreate(BaseModel):
