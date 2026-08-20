@@ -121,5 +121,5 @@ def generate_secure_filename(original_filename: str) -> str:
 
 
 def generate_otp() -> str:
-    """Generate a 6-digit OTP"""
-    return str(secrets.randbelow(900000) + 100000)
+    """Generate a 4-digit OTP"""
+    return str(secrets.randbelow(9000) + 1000)

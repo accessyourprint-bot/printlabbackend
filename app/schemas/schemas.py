@@ -356,6 +356,24 @@ class OrderOut(BaseModel):
     class Config:
         from_attributes = True
 
+class RiderOrderOut(BaseModel):
+    id: UUID
+    order_number: str
+    status: str
+    delivery_type: str
+    grand_total: float
+    delivery_cost: float
+    shop_name: Optional[str] = None
+    shop_address: Optional[str] = None
+    delivery_address: Optional[str] = None
+    distance_km: Optional[float] = None
+    eta_min: Optional[int] = None
+    distance_estimated: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 
 # ============================================================
 # PAYMENT SCHEMAS
@@ -479,6 +497,7 @@ class DeliveryPersonCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=255)
     phone: str = Field(..., min_length=10, max_length=15)
     vehicle_number: Optional[str] = None
+    city: Optional[str] = None
 
 
 class DeliveryPersonUpdate(BaseModel):
@@ -487,6 +506,9 @@ class DeliveryPersonUpdate(BaseModel):
     vehicle_number: Optional[str] = None
     is_active: Optional[bool] = None
     current_status: Optional[str] = Field(None, pattern="^(available|busy|offline)$")
+    city: Optional[str] = None
+    driving_licence_url: Optional[str] = None
+    vehicle_rc_url: Optional[str] = None
 
 
 class DeliveryPersonOut(BaseModel):
@@ -497,6 +519,14 @@ class DeliveryPersonOut(BaseModel):
     vehicle_number: Optional[str] = None
     is_active: bool
     current_status: str
+    city: Optional[str] = None
+    driving_licence_url: Optional[str] = None
+    vehicle_rc_url: Optional[str] = None
+    orders_completed: int = 0
+    total_earned: float = 0
+    current_lat: Optional[float] = None
+    current_lng: Optional[float] = None
+    location_updated_at: Optional[datetime] = None
     created_at: datetime
 
     class Config:
